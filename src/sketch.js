@@ -6,8 +6,20 @@ let lattice;
 let add, back;
 
 function setup() {
-    createCanvas(1000, 550);
+    createCanvas(windowWidth, windowHeight);
 
+    lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
+    let d = 0.05 * width;
+    snapshot = new Graph(width - d, d, 0.9 * d);
+    lattice.addSnapshot(snapshot);
+    add = new Button(width - d, 3 * d, 1.5 * d, d, "ADD");
+    back = new Button(width - d, height - d, 1.5 * d, d, "BACK");
+    display();
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    // Recalculer les positions des éléments
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     let d = 0.05 * width;
     snapshot = new Graph(width - d, d, 0.9 * d);
