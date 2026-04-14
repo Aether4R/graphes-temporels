@@ -12,7 +12,7 @@ class Graph {
         this.r = r;
 
         this.displayMissing = true;
-  }
+    }
 
     setPos(xc, yc, r) {
         this.xc = xc;
@@ -24,18 +24,18 @@ class Graph {
         }
     }
 
-    display() {
-        fill(0);
-        ellipseMode(CENTER);
+    display(p = window) {
+        p.fill(0);
+        p.ellipseMode(p.CENTER);
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                stroke(this.adj[i][j] ? 0 : 191);
+                p.stroke(this.adj[i][j] ? 0 : 191);
                 if (this.adj[i][j] || this.displayMissing) {
-                    line(this.v[i].x, this.v[i].y, this.v[j].x, this.v[j].y);
+                    p.line(this.v[i].x, this.v[i].y, this.v[j].x, this.v[j].y);
                 }
-                noStroke();
+                p.noStroke();
             }
-            circle(this.v[i].x, this.v[i].y, 0.1 * this.r);
+            p.circle(this.v[i].x, this.v[i].y, 0.1 * this.r);
         }
     }
 

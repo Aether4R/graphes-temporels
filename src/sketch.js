@@ -3,29 +3,81 @@ const S = 1 << (N - 1);
 
 let snapshot;
 let lattice;
-let add, back;
+let sidebarGraph;
+
+let addBtn, backBtn;
+
+let sidebarSketch = (p) => {
+    p.setup = function() {
+        let container = document.getElementById('graphContainer');
+        let canvas = p.createCanvas(container.offsetWidth - 4, container.offsetHeight - 4);
+        canvas.parent('graphContainer');
+    };
+
+    p.draw = function() {
+        p.background(255);
+        if (sidebarGraph) {
+            sidebarGraph.display(p);
+        }
+    };
+
+    p.windowResized = function() {
+        let container = document.getElementById('graphContainer');
+        if (container && container.offsetWidth > 0) {
+            p.resizeCanvas(container.offsetWidth - 4, container.offsetHeight - 4);
+        }
+    };
+};
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
+    createCanvas(windowWidth - 190, windowHeight);
+
+    new p5(sidebarSketch);
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     let d = 0.05 * width;
+
     snapshot = new Graph(width - d, d, 0.9 * d);
     lattice.addSnapshot(snapshot);
-    add = new Button(width - d, 3 * d, 1.5 * d, d, "ADD");
-    back = new Button(width - d, height - d, 1.5 * d, d, "BACK");
+    
+    sidebarGraph = new Graph(75, 75, 30);
+
+    addBtn = document.getElementById("addBtn");
+    backBtn = document.getElementById("backBtn");
+
+    addBtn.onclick = () => {
+        if (!addBtn.classList.contains("disabled")) {
+            addSnapshot();
+            display();
+        }
+    };
+
+    backBtn.onclick = () => {
+        if (!backBtn.classList.contains("disabled")) {
+            lattice.tables.pop();
+            lattice.tables.pop();
+            lattice.snapshots.pop();
+            lattice.snapshots.pop();
+            addSnapshot();
+            display();
+        }
+    };
+
+    addBtn.classList.add("disabled");
+    backBtn.classList.add("disabled");
+
     display();
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-    // Recalculer les positions des éléments
+    resizeCanvas(windowWidth - 190, windowHeight);
+
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     let d = 0.05 * width;
+
     snapshot = new Graph(width - d, d, 0.9 * d);
     lattice.addSnapshot(snapshot);
-    add = new Button(width - d, 3 * d, 1.5 * d, d, "ADD");
-    back = new Button(width - d, height - d, 1.5 * d, d, "BACK");
+
     display();
 }
 
@@ -35,21 +87,16 @@ function draw() {
 function mousePressed() {
     if (snapshot.updateEdges(createVector(mouseX, mouseY))) {
         lattice.update();
-        add.disabled = !snapshot.isConnected();
+
+        if (snapshot.isConnected()) {
+            addBtn.classList.remove("disabled");
+            addBtn.classList.add("enabled");
+        } else {
+            addBtn.classList.add("disabled");
+            addBtn.classList.remove("enabled");
+        }
     }
-    
-    if (add.click()) {
-        addSnapshot();
-    }
-    
-    if (back.click()) {
-        lattice.tables.pop();
-        lattice.tables.pop();
-        lattice.snapshots.pop();
-        lattice.snapshots.pop();
-        addSnapshot();
-    }
-    
+
     display();
 }
 
@@ -57,14 +104,22 @@ function display() {
     background(255);
     lattice.display();
     snapshot.display();
-    add.display();
-    back.display();
 }
 
 function addSnapshot() {
     let d = 0.05 * width;
+
     snapshot = new Graph(width - d, d, 0.9 * d);
     lattice.addSnapshot(snapshot);
-    add.disabled = true;
-    back.disabled = lattice.snapshots.length < 2;
+
+    addBtn.classList.add("disabled");
+    addBtn.classList.remove("enabled");
+
+    if (lattice.snapshots.length < 2) {
+        backBtn.classList.add("disabled");
+        backBtn.classList.remove("enabled");
+    } else {
+        backBtn.classList.remove("disabled");
+        backBtn.classList.add("enabled");
+    }
 }
