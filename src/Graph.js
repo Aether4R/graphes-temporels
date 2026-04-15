@@ -12,6 +12,7 @@ class Graph {
         this.r = r;
 
         this.displayMissing = true;
+        this.edgeTimes = Array.from({ length: N }, () => Array.from({ length: N }, () => []));
     }
 
     setPos(xc, yc, r) {
@@ -27,11 +28,25 @@ class Graph {
     display(p = window) {
         p.fill(0);
         p.ellipseMode(p.CENTER);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textSize(10);
+        
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
                 p.stroke(this.adj[i][j] ? 0 : 191);
                 if (this.adj[i][j] || this.displayMissing) {
                     p.line(this.v[i].x, this.v[i].y, this.v[j].x, this.v[j].y);
+                    
+                    // Afficher les temps si disponibles
+                    if (this.edgeTimes[i][j] && this.edgeTimes[i][j].length > 0) {
+                        let midX = (this.v[i].x + this.v[j].x) / 2;
+                        let midY = (this.v[i].y + this.v[j].y) / 2;
+                        
+                        let timeStr = this.edgeTimes[i][j].join(',');
+                        p.fill('red');
+                        p.noStroke();
+                        p.text(timeStr, midX, midY - 8);
+                    }
                 }
                 p.noStroke();
             }

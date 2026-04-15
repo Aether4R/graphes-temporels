@@ -4,7 +4,6 @@ const S = 1 << (N - 1);
 let snapshot;
 let lattice;
 let sidebarGraph;
-
 let addBtn, backBtn;
 
 let sidebarSketch = (p) => {
@@ -40,28 +39,14 @@ function setup() {
     snapshot = new Graph(width - d, d, 0.9 * d);
     lattice.addSnapshot(snapshot);
     
-    sidebarGraph = new Graph(75, 75, 30);
+    sidebarGraph = new Graph(75, 75, 0.9 * d);
 
     addBtn = document.getElementById("addBtn");
     backBtn = document.getElementById("backBtn");
 
-    addBtn.onclick = () => {
-        if (!addBtn.classList.contains("disabled")) {
-            addSnapshot();
-            display();
-        }
-    };
+    addBtn.onclick = handleAdd;
 
-    backBtn.onclick = () => {
-        if (!backBtn.classList.contains("disabled")) {
-            lattice.tables.pop();
-            lattice.tables.pop();
-            lattice.snapshots.pop();
-            lattice.snapshots.pop();
-            addSnapshot();
-            display();
-        }
-    };
+    backBtn.onclick = handleBack;
 
     addBtn.classList.add("disabled");
     backBtn.classList.add("disabled");
@@ -79,9 +64,6 @@ function windowResized() {
     lattice.addSnapshot(snapshot);
 
     display();
-}
-
-function draw() {
 }
 
 function mousePressed() {
@@ -104,6 +86,30 @@ function display() {
     background(255);
     lattice.display();
     snapshot.display();
+    
+    updateSidebarGraph();
+}
+
+function updateSidebarGraph() {
+    for (let i = 0; i < N; i++) {
+        for (let j = 0; j < N; j++) {
+            sidebarGraph.edgeTimes[i][j] = [];
+        }
+    }
+  
+    for (let t = 0; t < lattice.snapshots.length; t++) {
+        let snap = lattice.snapshots[t];
+        for (let i = 0; i < N; i++) {
+            for (let j = i + 1; j < N; j++) {
+                if (snap.adj[i][j]) {
+                    sidebarGraph.edgeTimes[i][j].push(t + 1);
+                    sidebarGraph.edgeTimes[j][i].push(t + 1);
+                    sidebarGraph.adj[i][j] = true;
+                    sidebarGraph.adj[j][i] = true;
+                }
+            }
+        }
+    }
 }
 
 function addSnapshot() {
@@ -123,3 +129,33 @@ function addSnapshot() {
         backBtn.classList.add("enabled");
     }
 }
+
+function handleAdd() {
+    if (!addBtn.classList.contains("disabled")) {
+        addSnapshot();
+        display();
+    }
+}
+
+function handleBack() {
+    if (!backBtn.classList.contains("disabled")) {
+        lattice.tables.pop();
+        lattice.tables.pop();
+        lattice.snapshots.pop();
+        lattice.snapshots.pop();
+        addSnapshot();
+        display();
+    }
+}
+
+document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        handleAdd();
+    }
+
+    if (event.ctrlKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        handleBack();
+    }
+});
