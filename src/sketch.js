@@ -1,10 +1,11 @@
-const N = 5;
-const S = 1 << (N - 1);
+let N = 5;
+let S = 1 << (N - 1);
 
 let snapshot;
 let lattice;
 let sidebarGraph;
 let addBtn, backBtn;
+let inputN;
 
 let sidebarSketch = (p) => {
     p.setup = function() {
@@ -33,13 +34,14 @@ function setup() {
 
     new p5(sidebarSketch);
 
-    lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
-    let d = 0.05 * width;
+    inputN = createInput(N, 'number');
+    inputN.parent('spinboxContainer');
+    inputN.attribute('min', 2);
+    inputN.attribute('max', 10);
 
-    snapshot = new Graph(width - d, d, 0.9 * d);
-    lattice.addSnapshot(snapshot);
-    
-    sidebarGraph = new Graph(75, 75, 0.9 * d);
+    inputN.input(updateN);
+
+    initSimulation();
 
     addBtn = document.getElementById("addBtn");
     backBtn = document.getElementById("backBtn");
@@ -50,20 +52,43 @@ function setup() {
 
     addBtn.classList.add("disabled");
     backBtn.classList.add("disabled");
-
-    display();
 }
 
 function windowResized() {
     resizeCanvas(windowWidth - 190, windowHeight);
+
+    lattice.w = 0.9 * width;
+    lattice.h = 0.9 * height;
+
+    let d = 0.05 * width;
+
+    snapshot.setPos(width - d, d, 0.9 * d);
+    sidebarGraph.setPos(75, 75, 0.9 * d);
+
+    display();
+}
+
+function initSimulation() {
+    S = 1 << (N - 1);
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     let d = 0.05 * width;
 
     snapshot = new Graph(width - d, d, 0.9 * d);
     lattice.addSnapshot(snapshot);
+    
+    sidebarGraph = new Graph(75, 75, 0.9 * d);
 
     display();
+}
+
+function updateN() {
+    let newN = int(inputN.value());
+
+    if (newN >= 2 && newN <= 10) {
+        N = newN;
+        initSimulation();
+    }
 }
 
 function mousePressed() {
