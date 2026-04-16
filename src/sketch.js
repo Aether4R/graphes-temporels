@@ -6,6 +6,9 @@ let lattice;
 let sidebarGraph;
 let addBtn, backBtn;
 let inputN; // Input pour le nombre de sommets
+let zoomLevel = 1;
+let panX = 0, panY = 0;
+let isPanning = false;
 
 let snapshotP5Instances = []; // Pour stocker les instances p5 des snapshots dans la barre
 
@@ -114,11 +117,28 @@ function mousePressed() {
     display();
 }
 
+function mouseWheel(event) {
+    let zoomFactor = event.delta > 0 ? 0.9 : 1.1;
+    
+    // Zoom centré sur la position de la souris
+    panX = mouseX - zoomFactor * (mouseX - panX);
+    panY = mouseY - zoomFactor * (mouseY - panY);
+    zoomLevel *= zoomFactor;
+    
+    display();
+    return false; // empêche le scroll de la page
+}
+
 function display() {
     background(255);
-    lattice.display();
-    snapshot.display();
-
+    
+    push();
+    translate(panX, panY);
+    scale(zoomLevel);
+    lattice.display(); // le lattice est zoomé/panné
+    pop();
+    
+    snapshot.display(); // le snapshot en haut à droite reste fixe
     updateSidebarGraph();
 }
 
