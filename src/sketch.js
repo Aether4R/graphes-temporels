@@ -5,7 +5,9 @@ let snapshot;
 let lattice;
 let sidebarGraph;
 let addBtn, backBtn;
-let inputN;
+let inputN; // Input pour le nombre de sommets
+
+let snapshotP5Instances = []; // Pour stocker les instances p5 des snapshots dans la barre
 
 let sidebarSketch = (p) => {
     p.setup = function() {
@@ -30,7 +32,8 @@ let sidebarSketch = (p) => {
 };
 
 function setup() {
-    createCanvas(windowWidth - 190, windowHeight);
+    let cnv = createCanvas(windowWidth - 190, windowHeight - 170);
+    cnv.parent('canvasContainer');
 
     new p5(sidebarSketch);
 
@@ -47,7 +50,6 @@ function setup() {
     backBtn = document.getElementById("backBtn");
 
     addBtn.onclick = handleAdd;
-
     backBtn.onclick = handleBack;
 
     addBtn.classList.add("disabled");
@@ -55,15 +57,15 @@ function setup() {
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth - 190, windowHeight);
+    resizeCanvas(windowWidth - 190, windowHeight - 170);
 
     lattice.w = 0.9 * width;
     lattice.h = 0.9 * height;
 
     let d = 0.05 * width;
 
-    snapshot.setPos(width - d, d, 0.9 * d);
-    sidebarGraph.setPos(75, 75, 0.9 * d);
+    snapshot.setPos(width - d, 75, 0.9 * d);
+    sidebarGraph.setPos(75, 75, 0.8 * d);
 
     display();
 }
@@ -71,13 +73,18 @@ function windowResized() {
 function initSimulation() {
     S = 1 << (N - 1);
 
+    // Détruire les instances p5 des snapshots existants
+    for (let inst of snapshotP5Instances) inst.remove();
+    snapshotP5Instances = [];
+    document.getElementById('snapshotBar').innerHTML = '';
+
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     let d = 0.05 * width;
 
-    snapshot = new Graph(width - d, d, 0.9 * d);
+    snapshot = new Graph(width - d, 75, 0.9 * d);
     lattice.addSnapshot(snapshot);
-    
-    sidebarGraph = new Graph(75, 75, 0.9 * d);
+
+    sidebarGraph = new Graph(75, 75, 0.8 * d);
 
     display();
 }
@@ -85,7 +92,7 @@ function initSimulation() {
 function updateN() {
     let newN = int(inputN.value());
 
-    if (newN >= 2 && newN <= 10) {
+    if (newN >= int(inputN.attribute('min')) && newN <= int(inputN.attribute('max'))) {
         N = newN;
         initSimulation();
     }
@@ -111,7 +118,7 @@ function display() {
     background(255);
     lattice.display();
     snapshot.display();
-    
+
     updateSidebarGraph();
 }
 
@@ -121,7 +128,7 @@ function updateSidebarGraph() {
             sidebarGraph.edgeTimes[i][j] = [];
         }
     }
-  
+
     for (let t = 0; t < lattice.snapshots.length; t++) {
         let snap = lattice.snapshots[t];
         for (let i = 0; i < N; i++) {
@@ -137,10 +144,51 @@ function updateSidebarGraph() {
     }
 }
 
+// Reconstruire la barre de snapshots après chaque ajout ou suppression pour refléter les changements
+function rebuildSnapshotBar() {
+    // Détruire les instances p5 existantes
+    for (let inst of snapshotP5Instances) inst.remove();
+    snapshotP5Instances = [];
+
+    const bar = document.getElementById('snapshotBar');
+    bar.innerHTML = '';
+
+    // Tous les snapshots sauf le dernier (en cours d'édition)
+    let count = lattice.snapshots.length - 1;
+    for (let t = 0; t < count; t++) {
+        let snap = lattice.snapshots[t];
+
+        const slot = document.createElement('div');
+        slot.className = 'snapshot-slot';
+
+        const label = document.createElement('div');
+        label.className = 'snapshot-label';
+        label.textContent = 'Temps ' + (t + 1);
+        slot.appendChild(label);
+        bar.appendChild(slot);
+
+        let inst = new p5((p) => {
+            p.setup = function() {
+                let c = p.createCanvas(140, 130);
+                c.parent(slot);
+                snap.setPos(70, 65, 45);
+            };
+            p.draw = function() {
+                p.background(255);
+                snap.display(p);
+            };
+        });
+        snapshotP5Instances.push(inst);
+    }
+
+    // Scroll automatique vers le dernier slot
+    setTimeout(() => { bar.scrollLeft = bar.scrollWidth; }, 50);
+}
+
 function addSnapshot() {
     let d = 0.05 * width;
 
-    snapshot = new Graph(width - d, d, 0.9 * d);
+    snapshot = new Graph(width - d, 75, 0.9 * d);
     lattice.addSnapshot(snapshot);
 
     addBtn.classList.add("disabled");
@@ -153,6 +201,8 @@ function addSnapshot() {
         backBtn.classList.remove("disabled");
         backBtn.classList.add("enabled");
     }
+
+    rebuildSnapshotBar();
 }
 
 function handleAdd() {
@@ -173,12 +223,15 @@ function handleBack() {
     }
 }
 
+// Raccourcis clavier
 document.addEventListener("keydown", (event) => {
+    // Ctrl + Shift + A pour ajouter un snapshot
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         handleAdd();
     }
 
+    // Ctrl + Z pour revenir en arrière
     if (event.ctrlKey && event.key.toLowerCase() === "z") {
         event.preventDefault();
         handleBack();

@@ -25,7 +25,7 @@ class Lattice{
         for (let l of subsetsTmp) {
             maxPerRow = max(maxPerRow, l.length);
         }
-        let size = this.w / maxPerRow;
+        let size = min(this.w / maxPerRow, 100);
         let yGap = (this.h - N * size) / (N + 1);
         
         let y = this.y0 + yGap + size / 2;
@@ -66,9 +66,6 @@ class Lattice{
     display(){
         this.tables[this.tables.length - 1].display();
         console.log(this.tables[this.tables.length - 1].phi());
-        for (let i = 0; i < this.snapshots.length; i++){
-            this.snapshots[i].display();
-        }
     }
 
     addSnapshot(snapshot) {

@@ -5,6 +5,8 @@ body {
     display: flex;
 }
 
+/* sidebar */
+
 .sidebar {
     width: 150px;
     background-color: #f0f0f0;
@@ -54,4 +56,67 @@ button.enabled:hover {
 button.disabled {
     background-color: rgb(191, 191, 191);
     cursor: default;
+}
+
+/* zone principale */
+
+.main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+#canvasContainer {
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* barre de snapshots */
+
+#snapshotBar {
+    height: 170px;
+    background: #fafafa;
+    border-top: 2px solid #ccc;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+}
+
+#snapshotBar::-webkit-scrollbar {
+    height: 6px;
+}
+#snapshotBar::-webkit-scrollbar-track {
+    background: #eee;
+}
+#snapshotBar::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 3px;
+}
+
+.snapshot-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    border-right: 1px solid #ddd;
+    min-width: 140px;
+}
+
+.snapshot-label {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 5px 0;
+    text-align: center;
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+    color: #555;
+    font-family: sans-serif;
+}
+
+#snapshotBar {
+    overflow: auto;
 }
