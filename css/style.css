@@ -87,7 +87,7 @@ button.disabled {
 }
 
 #snapshotBar::-webkit-scrollbar {
-    height: 6px;
+    height: 10px;
 }
 #snapshotBar::-webkit-scrollbar-track {
     background: #eee;
@@ -115,8 +115,4 @@ button.disabled {
     border-bottom: 1px solid #ddd;
     color: #555;
     font-family: sans-serif;
-}
-
-#snapshotBar {
-    overflow: auto;
 }

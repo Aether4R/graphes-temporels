@@ -5,12 +5,14 @@ let snapshot;
 let lattice;
 let sidebarGraph;
 let addBtn, backBtn;
-let inputN; // Input pour le nombre de sommets
+let inputN;
 let zoomLevel = 1;
 let panX = 0, panY = 0;
 let isPanning = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
 
-let snapshotP5Instances = []; // Pour stocker les instances p5 des snapshots dans la barre
+let snapshotP5Instances = [];
 
 let sidebarSketch = (p) => {
     p.setup = function() {
@@ -44,19 +46,25 @@ function setup() {
     inputN.parent('spinboxContainer');
     inputN.attribute('min', 2);
     inputN.attribute('max', 10);
-
     inputN.input(updateN);
 
     initSimulation();
 
-    addBtn = document.getElementById("addBtn");
+    addBtn  = document.getElementById("addBtn");
     backBtn = document.getElementById("backBtn");
 
-    addBtn.onclick = handleAdd;
+    addBtn.onclick  = handleAdd;
     backBtn.onclick = handleBack;
 
     addBtn.classList.add("disabled");
     backBtn.classList.add("disabled");
+
+    // La snapshotBar gère son propre scroll, indépendamment de p5
+    document.getElementById('snapshotBar').addEventListener('wheel', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        document.getElementById('snapshotBar').scrollLeft += e.deltaY || e.deltaX;
+    }, { passive: false });
 }
 
 function windowResized() {
@@ -66,7 +74,6 @@ function windowResized() {
     lattice.h = 0.9 * height;
 
     let d = 0.05 * width;
-
     snapshot.setPos(width - d, 75, 0.9 * d);
     sidebarGraph.setPos(75, 75, 0.8 * d);
 
@@ -76,7 +83,6 @@ function windowResized() {
 function initSimulation() {
     S = 1 << (N - 1);
 
-    // Détruire les instances p5 des snapshots existants
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
     document.getElementById('snapshotBar').innerHTML = '';
@@ -94,7 +100,6 @@ function initSimulation() {
 
 function updateN() {
     let newN = int(inputN.value());
-
     if (newN >= int(inputN.attribute('min')) && newN <= int(inputN.attribute('max'))) {
         N = newN;
         initSimulation();
@@ -102,6 +107,15 @@ function updateN() {
 }
 
 function mousePressed() {
+    // Vérifier que la souris est sur le canvas principal
+    if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
+        return;
+    }
+
+    isPanning = true;
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+
     if (snapshot.updateEdges(createVector(mouseX, mouseY))) {
         lattice.update();
 
@@ -117,28 +131,54 @@ function mousePressed() {
     display();
 }
 
+function mouseDragged() {
+    // Vérifier que la souris est sur le canvas principal
+    if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
+        return;
+    }
+
+    let dx = mouseX - lastMouseX;
+    let dy = mouseY - lastMouseY;
+
+    if (abs(dx) + abs(dy) < 2) return;
+
+    panX += dx;
+    panY += dy;
+
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
+
+    display();
+}
+
+function mouseReleased() {
+    isPanning = false;
+}
+
 function mouseWheel(event) {
+    if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
+        return;
+    }
+
     let zoomFactor = event.delta > 0 ? 0.9 : 1.1;
-    
-    // Zoom centré sur la position de la souris
     panX = mouseX - zoomFactor * (mouseX - panX);
     panY = mouseY - zoomFactor * (mouseY - panY);
     zoomLevel *= zoomFactor;
-    
+
     display();
-    return false; // empêche le scroll de la page
+    return false; // bloquer le scroll page seulement dans le canvas
 }
 
 function display() {
     background(255);
-    
+
     push();
     translate(panX, panY);
     scale(zoomLevel);
-    lattice.display(); // le lattice est zoomé/panné
+    lattice.display();
     pop();
-    
-    snapshot.display(); // le snapshot en haut à droite reste fixe
+
+    snapshot.display();
     updateSidebarGraph();
 }
 
@@ -164,16 +204,13 @@ function updateSidebarGraph() {
     }
 }
 
-// Reconstruire la barre de snapshots après chaque ajout ou suppression pour refléter les changements
 function rebuildSnapshotBar() {
-    // Détruire les instances p5 existantes
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
 
     const bar = document.getElementById('snapshotBar');
     bar.innerHTML = '';
 
-    // Tous les snapshots sauf le dernier (en cours d'édition)
     let count = lattice.snapshots.length - 1;
     for (let t = 0; t < count; t++) {
         let snap = lattice.snapshots[t];
@@ -201,7 +238,6 @@ function rebuildSnapshotBar() {
         snapshotP5Instances.push(inst);
     }
 
-    // Scroll automatique vers le dernier slot
     setTimeout(() => { bar.scrollLeft = bar.scrollWidth; }, 50);
 }
 
@@ -243,15 +279,11 @@ function handleBack() {
     }
 }
 
-// Raccourcis clavier
 document.addEventListener("keydown", (event) => {
-    // Ctrl + Shift + A pour ajouter un snapshot
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         handleAdd();
     }
-
-    // Ctrl + Z pour revenir en arrière
     if (event.ctrlKey && event.key.toLowerCase() === "z") {
         event.preventDefault();
         handleBack();
