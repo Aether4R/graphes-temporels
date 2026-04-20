@@ -11,6 +11,8 @@ let panX = 0, panY = 0;
 let isPanning = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
+let latticeBuffer;
+let lastDrawnTableIndex = -1;
 
 let snapshotP5Instances = [];
 
@@ -72,6 +74,9 @@ function windowResized() {
 
     lattice.w = 0.9 * width;
     lattice.h = 0.9 * height;
+    // Redimensionner le buffer
+    latticeBuffer = createGraphics(lattice.w, lattice.h);
+    lastDrawnTableIndex = -1; // Forcer le redessinage
 
     let d = 0.05 * width;
     snapshot.setPos(width - d, 75, 0.9 * d);
@@ -88,6 +93,9 @@ function initSimulation() {
     document.getElementById('snapshotBar').innerHTML = '';
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
+    // Créer le buffer pour cacher le lattice
+    latticeBuffer = createGraphics(lattice.w, lattice.h);
+    lastDrawnTableIndex = -1;
     let d = 0.05 * width;
 
     snapshot = new Graph(width - d, 75, 0.9 * d);
@@ -99,11 +107,14 @@ function initSimulation() {
 }
 
 function updateN() {
-    let newN = int(inputN.value());
-    if (newN >= int(inputN.attribute('min')) && newN <= int(inputN.attribute('max'))) {
-        N = newN;
-        initSimulation();
-    }
+    clearTimeout(updateN._timer);
+    updateN._timer = setTimeout(() => {
+        let newN = int(inputN.value());
+        if (newN >= int(inputN.attribute('min')) && newN <= int(inputN.attribute('max'))) {
+            N = newN;
+            initSimulation();
+        }
+    }, 300);
 }
 
 function mousePressed() {
@@ -170,12 +181,23 @@ function mouseWheel(event) {
 }
 
 function display() {
-    background(255);
+    // Redessiner le lattice sur le buffer seulement si la table active a changé
+    let currentTableIndex = lattice.tables.length - 1;
+    if (currentTableIndex !== lastDrawnTableIndex) {
+        latticeBuffer.background(255);
+        latticeBuffer.push();
+        // Appeler la méthode display du lattice sur le buffer
+        lattice.tables[currentTableIndex].display(latticeBuffer);
+        latticeBuffer.pop();
+        lastDrawnTableIndex = currentTableIndex;
+    }
 
+    // Afficher le canvas principal
+    background(255);
     push();
     translate(panX, panY);
     scale(zoomLevel);
-    lattice.display();
+    image(latticeBuffer, lattice.x0, lattice.y0);
     pop();
 
     snapshot.display();
@@ -204,41 +226,44 @@ function updateSidebarGraph() {
     }
 }
 
+function addSnapshotSlot(snap, t) {
+    const bar = document.getElementById('snapshotBar');
+
+    const slot = document.createElement('div');
+    slot.className = 'snapshot-slot';
+
+    const label = document.createElement('div');
+    label.className = 'snapshot-label';
+    label.textContent = 'Temps ' + t;
+    slot.appendChild(label);
+    bar.appendChild(slot);
+
+    let inst = new p5((p) => {
+        p.setup = function() {
+            let c = p.createCanvas(140, 130);
+            c.parent(slot);
+            snap.setPos(70, 65, 45);
+            p.noLoop();
+        };
+        p.draw = function() {
+            p.background(255);
+            snap.display(p);
+        };
+    });
+    snapshotP5Instances.push(inst);
+
+    setTimeout(() => { bar.scrollLeft = bar.scrollWidth; }, 50);
+}
+
 function rebuildSnapshotBar() {
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
-
-    const bar = document.getElementById('snapshotBar');
-    bar.innerHTML = '';
+    document.getElementById('snapshotBar').innerHTML = '';
 
     let count = lattice.snapshots.length - 1;
     for (let t = 0; t < count; t++) {
-        let snap = lattice.snapshots[t];
-
-        const slot = document.createElement('div');
-        slot.className = 'snapshot-slot';
-
-        const label = document.createElement('div');
-        label.className = 'snapshot-label';
-        label.textContent = 'Temps ' + (t + 1);
-        slot.appendChild(label);
-        bar.appendChild(slot);
-
-        let inst = new p5((p) => {
-            p.setup = function() {
-                let c = p.createCanvas(140, 130);
-                c.parent(slot);
-                snap.setPos(70, 65, 45);
-            };
-            p.draw = function() {
-                p.background(255);
-                snap.display(p);
-            };
-        });
-        snapshotP5Instances.push(inst);
+        addSnapshotSlot(lattice.snapshots[t], t + 1);
     }
-
-    setTimeout(() => { bar.scrollLeft = bar.scrollWidth; }, 50);
 }
 
 function addSnapshot() {
@@ -258,7 +283,7 @@ function addSnapshot() {
         backBtn.classList.add("enabled");
     }
 
-    rebuildSnapshotBar();
+    addSnapshotSlot(lattice.snapshots[lattice.snapshots.length - 2], lattice.snapshots.length - 1);
 }
 
 function handleAdd() {

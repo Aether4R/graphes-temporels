@@ -20,35 +20,36 @@ class Table {
         }
     }
 
-    display() {
-        this.displayLinks();
+    display(p = null) {
+        this.displayLinks(p);
         for (let v = 0; v < N; v++) {
             for (let s = 0; s < S; s++) {
                 if (this.subsets[v][s] != null) {
-                    this.subsets[v][s].display();
+                    this.subsets[v][s].display(p);
                 }
             }
         }
     }
 
-    displayLinks(){
+    displayLinks(p = null) {
+        const ctx = p || window;
         for (let v = 0; v < N; v++){
             for (let s = 0; s < S; s++){
                 let child = this.subsets[v][s];
                 if (child != null){
-                    stroke(child.fresh ? color(255, 0, 0) : color(128));
+                    ctx.stroke(child.fresh ? ctx.color(255, 0, 0) : ctx.color(128));
                     let parent = child.parent;
                     if (parent != null){
                         if (child.y != parent.y) {
-                            line(parent.x, parent.y - parent.size / 2, child.x, child.y + child.size / 2);
+                            ctx.line(parent.x, parent.y - parent.size / 2, child.x, child.y + child.size / 2);
                         } else {
                             let d = abs(parent.x - child.x) / 2;
                             let h = d / 2;
                             let r = (d * d + h * h) / 2 / h;
                             let alpha = atan2(d, r - h);
-                            ellipseMode(RADIUS);
-                            noFill();
-                            arc((parent.x + child.x) / 2, child.y - r + h + child.size / 2, r, r, HALF_PI - alpha, HALF_PI + alpha);
+                            ctx.ellipseMode(RADIUS);
+                            ctx.noFill();
+                            ctx.arc((parent.x + child.x) / 2, child.y - r + h + child.size / 2, r, r, HALF_PI - alpha, HALF_PI + alpha);
                         }
                     }
                 }
