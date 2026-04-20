@@ -68,6 +68,10 @@ class Lattice{
         console.log(this.tables[this.tables.length - 1].phi());
     }
 
+    /**
+     * Ajoute une snapshot au lattice, en créant un nouveau tableau à partir de la dernière snapshot ajoutée
+     * @param {Graph} snapshot - La snapshot à ajouter au lattice
+     */
     addSnapshot(snapshot) {
         if (this.snapshots.length > 0){
             let n = this.snapshots.length - 1;
@@ -79,6 +83,9 @@ class Lattice{
         this.update();
     }
 
+    /**
+     * Met à jour le dernier tableau du lattice en fonction de la dernière snapshot ajoutée
+     */
     update() {
         let n = this.tables.length;
         let prev = this.tables[n - 2];

@@ -69,6 +69,9 @@ function setup() {
     }, { passive: false });
 }
 
+/**
+ * Redimensionne le canvas et les éléments associés lorsque la fenêtre est redimensionnée
+ */
 function windowResized() {
     resizeCanvas(windowWidth - 190, windowHeight - 170);
 
@@ -85,6 +88,9 @@ function windowResized() {
     display();
 }
 
+/**
+ * Initialise la simulation en créant le lattice, les graphes et en réinitialisant les variables
+ */
 function initSimulation() {
     S = 1 << (N - 1);
 
@@ -106,6 +112,10 @@ function initSimulation() {
     display();
 }
 
+/**
+ * Met à jour la valeur de N en fonction de l'entrée utilisateur, 
+ * avec un délai pour éviter les mises à jour trop fréquentes
+ */
 function updateN() {
     clearTimeout(updateN._timer);
     updateN._timer = setTimeout(() => {
@@ -117,6 +127,9 @@ function updateN() {
     }, 300);
 }
 
+/**
+ * Gère le clic de souris pour ajouter/supprimer des arêtes ou pour faire du pan
+ */
 function mousePressed() {
     // Vérifier que la souris est sur le canvas principal
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
@@ -142,6 +155,9 @@ function mousePressed() {
     display();
 }
 
+/**
+ * Gère le déplacement de la souris pour faire du pan
+ */
 function mouseDragged() {
     // Vérifier que la souris est sur le canvas principal
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
@@ -162,10 +178,16 @@ function mouseDragged() {
     display();
 }
 
+/**
+ * Gère la fin du déplacement de la souris pour arrêter le pan
+ */
 function mouseReleased() {
     isPanning = false;
 }
 
+/**
+ * Gère le zoom avec la molette de la souris, en centrant le zoom sur la position de la souris
+ */
 function mouseWheel(event) {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
         return;
@@ -178,6 +200,18 @@ function mouseWheel(event) {
 
     display();
     return false; // bloquer le scroll page seulement dans le canvas
+}
+
+/**
+ * Gère le déplacement de la souris pour mettre en évidence les arêtes survolées
+ */
+function mouseMoved() {
+    if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
+        return;
+    }
+    if (snapshot.updateHover(createVector(mouseX, mouseY))) {
+        display();
+    }
 }
 
 function display() {
@@ -204,6 +238,9 @@ function display() {
     updateSidebarGraph();
 }
 
+/**
+ * Met à jour le graphe de la sidebar en fonction des snapshots du lattice
+ */
 function updateSidebarGraph() {
     for (let i = 0; i < N; i++) {
         for (let j = 0; j < N; j++) {
@@ -226,6 +263,11 @@ function updateSidebarGraph() {
     }
 }
 
+/**
+ * Ajoute une nouvelle snapshot à la barre de snapshots, avec un label indiquant le temps
+ * @param {Graph} snap - La snapshot à afficher
+ * @param {number} t - Le temps associé à la snapshot
+ */
 function addSnapshotSlot(snap, t) {
     const bar = document.getElementById('snapshotBar');
 
@@ -255,6 +297,9 @@ function addSnapshotSlot(snap, t) {
     setTimeout(() => { bar.scrollLeft = bar.scrollWidth; }, 50);
 }
 
+/**
+ * Recrée toute la barre de snapshots à partir des snapshots du lattice, en cas de changement de N
+ */
 function rebuildSnapshotBar() {
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
@@ -266,6 +311,9 @@ function rebuildSnapshotBar() {
     }
 }
 
+/**
+ * Ajoute une nouvelle snapshot au lattice et à la barre de snapshots, et met à jour les boutons
+ */
 function addSnapshot() {
     let d = 0.05 * width;
 
@@ -286,6 +334,10 @@ function addSnapshot() {
     addSnapshotSlot(lattice.snapshots[lattice.snapshots.length - 2], lattice.snapshots.length - 1);
 }
 
+/**
+ * Gère le clic sur le bouton "Ajouter" pour ajouter une nouvelle snapshot, 
+ * si le bouton n'est pas désactivé
+ */
 function handleAdd() {
     if (!addBtn.classList.contains("disabled")) {
         addSnapshot();
@@ -293,6 +345,10 @@ function handleAdd() {
     }
 }
 
+/**
+ * Gère le clic sur le bouton "Retour" pour revenir à la snapshot précédente, 
+ * si le bouton n'est pas désactivé
+ */
 function handleBack() {
     if (!backBtn.classList.contains("disabled")) {
         lattice.tables.pop();
@@ -304,6 +360,7 @@ function handleBack() {
     }
 }
 
+// Gérer les raccourcis clavier pour ajouter une snapshot (Ctrl+Shift+A) et revenir en arrière (Ctrl+Z)
 document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();

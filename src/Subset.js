@@ -12,6 +12,10 @@ class Subset {
         this.fresh = false;
     }
 
+    /**
+     * Copie les propriétés d'un autre subset dans celui-ci
+     * @param {Subset} s - Le subset à copier
+     */
     copy(s) {
         this.bits = s.bits;
         this.current = s.current;

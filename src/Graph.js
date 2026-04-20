@@ -13,8 +13,16 @@ class Graph {
 
         this.displayMissing = true;
         this.edgeTimes = Array.from({ length: N }, () => Array.from({ length: N }, () => []));
+        
+        this.hoveredEdges = []; // Liste des arêtes actuellement survolées
     }
 
+    /**
+     * Définit la position et le rayon du graphe
+     * @param {number} xc - La coordonnée x du centre
+     * @param {number} yc - La coordonnée y du centre
+     * @param {number} r - Le rayon
+     */
     setPos(xc, yc, r) {
         this.xc = xc;
         this.yc = yc;
@@ -33,11 +41,19 @@ class Graph {
         
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                p.stroke(this.adj[i][j] ? 0 : 191);
+                // Vérifier si l'arête est survolée pour la mettre en évidence
+                let isHovered = this.hoveredEdges.some(e => e[0] === i && e[1] === j);
+                if (isHovered) {
+                    p.stroke(140);
+                    p.strokeWeight(1.5);
+                } else {
+                    p.stroke(this.adj[i][j] ? 0 : 191);
+                    p.strokeWeight(1);
+                }
+
                 if (this.adj[i][j] || this.displayMissing) {
                     p.line(this.v[i].x, this.v[i].y, this.v[j].x, this.v[j].y);
                     
-                    // Afficher les temps si disponibles
                     if (this.edgeTimes[i][j] && this.edgeTimes[i][j].length > 0) {
                         let midX = (this.v[i].x + this.v[j].x) / 2;
                         let midY = (this.v[i].y + this.v[j].y) / 2;
@@ -49,11 +65,41 @@ class Graph {
                     }
                 }
                 p.noStroke();
+                p.strokeWeight(1);
             }
+            p.fill(0);
             p.circle(this.v[i].x, this.v[i].y, 0.1 * this.r);
         }
     }
 
+    /**
+    * Met à jour l'état de survol des arêtes
+    * @param {p5.Vector} mouse - La position de la souris
+    * @returns {boolean} - true si l'état a changé, false sinon
+    */
+    updateHover(mouse) {
+        let newHovered = [];
+        // Vérifier pour chaque arête si elle est survolée
+        for (let i = 0; i < N; i++) {
+            for (let j = i + 1; j < N; j++) {
+                if (distSegPoint(this.v[i], this.v[j], mouse) < CLICK_TRESHOLD) {
+                    newHovered.push([i, j]);
+                }
+            }
+        }
+        // Vérifier si la liste des arêtes survolées a changé
+        let sameLength = newHovered.length === this.hoveredEdges.length;
+        let sameEdges = sameLength && newHovered.every((e, k) => e[0] === this.hoveredEdges[k][0] && e[1] === this.hoveredEdges[k][1]);
+        let changed = !sameLength || !sameEdges;
+        this.hoveredEdges = newHovered;
+        return changed;
+    }
+
+    /**
+     * Met à jour les arêtes du graphe
+     * @param {p5.Vector} click - La position du clic
+     * @returns {boolean} - true si le graphe a été mis à jour, false sinon
+     */
     updateEdges(click) {
         let updated = false;
         for (let i = 0; i < N; i++) {
@@ -68,6 +114,10 @@ class Graph {
         return updated;
     }
 
+    /**
+     * Vérifie si le graphe est connexe
+     * @returns {boolean} - true si le graphe est connexe, false sinon
+     */
     isConnected() {
         let visited = Array(N).fill(false);
         this.dfs(0, visited);
@@ -79,6 +129,11 @@ class Graph {
         return true;
     }
 
+    /**
+     * Effectue une recherche en profondeur à partir d'un sommet donné
+     * @param {number} u - Le sommet de départ
+     * @param {boolean[]} visited - Le tableau des sommets visités
+     */
     dfs(u, visited) {
         visited[u] = true;
         for (let v = 0; v < N; v++){

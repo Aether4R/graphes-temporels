@@ -31,6 +31,10 @@ class Table {
         }
     }
 
+    /**
+     * Affiche les liens entre les subsets
+     * @param {*} p 
+     */
     displayLinks(p = null) {
         const ctx = p || window;
         for (let v = 0; v < N; v++){
@@ -57,6 +61,11 @@ class Table {
         }
     }
 
+    /**
+     * Met à jour les subsets du tableau en fonction d'une snapshot donnée
+     * @param {Graph} snapshot - La snapshot à partir de laquelle mettre à jour les subsets
+     * @param {Table} next - Le tableau dans lequel stocker les subsets mis à jour
+     */
     updateNext(snapshot, next) {
         for (let v = 0; v < N; v++) {
             for (let s = 0; s < S; s++) {
@@ -87,6 +96,10 @@ class Table {
         }
     }
 
+    /**
+     * Calcule la fonction phi du tableau, qui est la somme des minimums entre le nombre de hops de chaque subset et 2N-2
+     * @returns {number} - La valeur de phi
+     */
     phi() {
         let sum = 0;
         for (let v = 0; v < N; v++) {

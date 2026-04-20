@@ -1,3 +1,10 @@
+/**
+ * Calcule la distance entre un segment et un point
+ * @param {p5.Vector} a - Le premier point du segment
+ * @param {p5.Vector} b - Le deuxième point du segment
+ * @param {p5.Vector} p - Le point
+ * @returns {number} - La distance
+ */
 function distSegPoint(a, b, p) {
   let n = p5.Vector.sub(b, a);
   let t = constrain(n.dot(p5.Vector.sub(p, a)) / n.magSq(), 0, 1);
