@@ -54,12 +54,18 @@ function setup() {
 
     addBtn  = document.getElementById("addBtn");
     backBtn = document.getElementById("backBtn");
+    saveBtn = document.getElementById("saveBtn");
+    loadBtn = document.getElementById("loadBtn");
 
     addBtn.onclick  = handleAdd;
     backBtn.onclick = handleBack;
+    saveBtn.onclick = saveSession;
+    loadBtn.onclick = loadSession;
 
     addBtn.classList.add("disabled");
     backBtn.classList.add("disabled");
+    saveBtn.classList.add("enabled");
+    loadBtn.classList.add("enabled");
 
     // La snapshotBar gère son propre scroll, indépendamment de p5
     document.getElementById('snapshotBar').addEventListener('wheel', (e) => {
@@ -93,6 +99,9 @@ function windowResized() {
  */
 function initSimulation() {
     S = 1 << (N - 1);
+    zoomLevel = 1;
+    panX = 0;
+    panY = 0;
 
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
@@ -356,6 +365,61 @@ function handleBack() {
         lattice.snapshots.pop();
         lattice.snapshots.pop();
         addSnapshot();
+        rebuildSnapshotBar();
+        display();
+    }
+}
+
+/**
+ * Sauvegarde la session actuelle (N et les snapshots) dans un fichier JSON téléchargeable
+ */
+function saveSession() {
+    const data = {
+        N,
+        snapshots: lattice.snapshots.slice(0, -1).map(snap => snap.adj)
+    };
+    saveJSON(data, 'session.json');
+}
+
+/**
+ * Ouvre un dialogue de sélection de fichier pour charger une session à partir d'un fichier JSON, 
+ * puis applique les données chargées à la simulation
+ */
+function loadSession() {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.click();
+
+    fileInput.onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            applySession(data);
+        };
+        reader.readAsText(file);
+    }
+}
+
+/**
+ * Applique les données d'une session chargée à la simulation, 
+ * en réinitialisant le lattice et en recréant les snapshots
+ * @param {Object} data - Les données de la session, contenant N et les snapshots
+ */
+function applySession(data) {
+    if (data.N && data.snapshots) {
+        N = data.N;
+        inputN.value(data.N);
+        initSimulation();
+        for (let adj of data.snapshots) {
+            let snap = new Graph(0, 0, 0);
+            snap.adj = adj;
+            lattice.addSnapshot(snap);
+            addSnapshotSlot(snap, lattice.snapshots.length - 1);
+        }
+        let d = 0.05 * width;
+        snapshot.setPos(width - d, 75, 0.9 * d);
         display();
     }
 }
