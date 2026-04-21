@@ -230,7 +230,7 @@ function display() {
         latticeBuffer.background(255);
         latticeBuffer.push();
         // Appeler la méthode display du lattice sur le buffer
-        lattice.tables[currentTableIndex].display(latticeBuffer);
+        lattice.display(latticeBuffer);
         latticeBuffer.pop();
         lastDrawnTableIndex = currentTableIndex;
     }
@@ -257,7 +257,7 @@ function updateSidebarGraph() {
         }
     }
 
-    for (let t = 0; t < lattice.snapshots.length; t++) {
+    for (let t = 0; t < lattice.snapshots.length - 1; t++) {
         let snap = lattice.snapshots[t];
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
@@ -411,27 +411,56 @@ function applySession(data) {
     if (data.N && data.snapshots) {
         N = data.N;
         inputN.value(data.N);
-        initSimulation();
+        S = 1 << (N - 1);
+
+        // Nettoyer les instances p5 des snapshots précédentes et la barre de snapshots
+        for (let inst of snapshotP5Instances) inst.remove();
+        snapshotP5Instances = [];
+        document.getElementById('snapshotBar').innerHTML = '';
+
+        // Recréer le lattice et les graphes
+        lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
+        latticeBuffer = createGraphics(lattice.w, lattice.h);
+        lastDrawnTableIndex = -1;
+
         for (let adj of data.snapshots) {
             let snap = new Graph(0, 0, 0);
             snap.adj = adj;
             lattice.addSnapshot(snap);
             addSnapshotSlot(snap, lattice.snapshots.length - 1);
         }
+
         let d = 0.05 * width;
-        snapshot.setPos(width - d, 75, 0.9 * d);
+        snapshot = new Graph(width - d, 75, 0.9 * d);
+        lattice.addSnapshot(snapshot); 
+        
+        sidebarGraph = new Graph(75, 75, 0.8 * d);
+        updateSidebarGraph();
+
         display();
     }
 }
 
-// Gérer les raccourcis clavier pour ajouter une snapshot (Ctrl+Shift+A) et revenir en arrière (Ctrl+Z)
+// Gérer les raccourcis clavier
 document.addEventListener("keydown", (event) => {
+    // Ctrl + Shift + a pour ajouter une snapshot
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         handleAdd();
     }
+    // Ctrl + z pour revenir à la snapshot précédente
     if (event.ctrlKey && event.key.toLowerCase() === "z") {
         event.preventDefault();
         handleBack();
+    }
+    // Ctrl + Shift + s pour sauvegarder la session    
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        saveSession();
+    }
+    // Ctrl + Shift + o pour charger une session
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
+        event.preventDefault();
+        loadSession();
     }
 });

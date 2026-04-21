@@ -63,8 +63,8 @@ class Lattice{
         this.snapshots = [];
     }
 
-    display(){
-        this.tables[this.tables.length - 1].display();
+    display(p) {
+        this.tables[this.tables.length - 1].display(p);
         console.log(this.tables[this.tables.length - 1].phi());
     }
 
