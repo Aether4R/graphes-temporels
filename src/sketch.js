@@ -73,6 +73,11 @@ function setup() {
         e.preventDefault();
         document.getElementById('snapshotBar').scrollLeft += e.deltaY || e.deltaX;
     }, { passive: false });
+
+    let el = document.getElementById('zoom-indicator');
+    if (el) {
+        el.style.opacity = 0;
+    }
 }
 
 /**
@@ -207,6 +212,17 @@ function mouseWheel(event) {
     panY = mouseY - zoomFactor * (mouseY - panY);
     zoomLevel *= zoomFactor;
 
+    let el = document.getElementById('zoom-indicator');
+    if (el) {
+        el.innerText = Math.floor(zoomLevel * 100) + "%";
+        el.style.opacity = 1;
+
+        clearTimeout(mouseWheel._timer);
+        mouseWheel._timer = setTimeout(() => {
+            el.style.opacity = 0;
+        }, 1500);
+    }
+
     display();
     return false; // bloquer le scroll page seulement dans le canvas
 }
@@ -218,6 +234,13 @@ function mouseMoved() {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
         return;
     }
+
+    if (snapshot.hoveredEdges.length > 0) {
+        cursor('pointer');
+    } else {
+        cursor('default');
+    }
+
     if (snapshot.updateHover(createVector(mouseX, mouseY))) {
         display();
     }
@@ -427,7 +450,7 @@ function applySession(data) {
             let snap = new Graph(0, 0, 0);
             snap.adj = adj;
             lattice.addSnapshot(snap);
-            addSnapshotSlot(snap, lattice.snapshots.length - 1);
+            addSnapshotSlot(snap, lattice.snapshots.length);
         }
 
         let d = 0.05 * width;
