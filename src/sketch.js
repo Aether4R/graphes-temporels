@@ -67,6 +67,21 @@ function setup() {
     saveBtn.classList.add("enabled");
     loadBtn.classList.add("enabled");
 
+    document.getElementById('btnConfirm').onclick = () => {
+        lattice.tables.pop();
+        lattice.tables.pop();
+        lattice.snapshots.pop();
+        lattice.snapshots.pop();
+        addSnapshot();
+        rebuildSnapshotBar();
+        display();
+        document.getElementById('modalOverlay').classList.add('hidden');
+    };
+
+    document.getElementById('btnCancel').onclick = () => {
+        document.getElementById('modalOverlay').classList.add('hidden');
+    };
+
     // La snapshotBar gère son propre scroll, indépendamment de p5
     document.getElementById('snapshotBar').addEventListener('wheel', (e) => {
         e.stopPropagation();
@@ -124,6 +139,7 @@ function initSimulation() {
     sidebarGraph = new Graph(75, 75, 0.8 * d);
 
     display();
+    updateConnexityIndicator();
 }
 
 /**
@@ -167,6 +183,7 @@ function mousePressed() {
     }
 
     display();
+    updateConnexityIndicator();
 }
 
 /**
@@ -364,6 +381,7 @@ function addSnapshot() {
     }
 
     addSnapshotSlot(lattice.snapshots[lattice.snapshots.length - 2], lattice.snapshots.length - 1);
+    updateConnexityIndicator();
 }
 
 /**
@@ -378,18 +396,12 @@ function handleAdd() {
 }
 
 /**
- * Gère le clic sur le bouton "Retour" pour revenir à la snapshot précédente, 
- * si le bouton n'est pas désactivé
+ * Gère le clic sur le bouton "Retour" pour revenir à la snapshot précédente,
+ * en affichant une confirmation, si le bouton n'est pas désactivé
  */
 function handleBack() {
     if (!backBtn.classList.contains("disabled")) {
-        lattice.tables.pop();
-        lattice.tables.pop();
-        lattice.snapshots.pop();
-        lattice.snapshots.pop();
-        addSnapshot();
-        rebuildSnapshotBar();
-        display();
+        document.getElementById('modalOverlay').classList.remove('hidden');
     }
 }
 
@@ -461,6 +473,22 @@ function applySession(data) {
         updateSidebarGraph();
 
         display();
+        updateConnexityIndicator();
+    }
+}
+
+/**
+ * Met à jour l'indicateur de connexité dans la sidebar en fonction de l'état de la snapshot actuelle
+ */
+function updateConnexityIndicator() {
+    const dot = document.getElementById('connexityDot');
+    const text = document.getElementById('connexityText');
+    if (snapshot.isConnected()) {
+        dot.className = 'connected';
+        text.textContent = 'Connexe';
+    } else {
+        dot.className = 'disconnected';
+        text.textContent = 'Non connexe';
     }
 }
 
