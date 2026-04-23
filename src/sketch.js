@@ -13,6 +13,7 @@ let lastMouseX = 0;
 let lastMouseY = 0;
 let latticeBuffer;
 let lastDrawnTableIndex = -1;
+let dragOnEdge = false;
 
 let snapshotP5Instances = [];
 
@@ -179,11 +180,12 @@ function mousePressed() {
         return;
     }
 
+    dragOnEdge = snapshot.updateEdges(createVector(mouseX, mouseY));
     isPanning = true;
     lastMouseX = mouseX;
     lastMouseY = mouseY;
 
-    if (snapshot.updateEdges(createVector(mouseX, mouseY))) {
+    if (dragOnEdge) {
         lattice.update();
 
         if (snapshot.isConnected()) {
@@ -210,6 +212,10 @@ function mouseDragged() {
 
     // Vérifier que la modale n'est pas ouverte
     if (!document.getElementById('modalOverlay').classList.contains('hidden')) {
+        return;
+    }
+
+    if (dragOnEdge) {
         return;
     }
 
