@@ -228,3 +228,13 @@ button.disabled {
     color: #555;
     font-family: sans-serif;
 }
+
+#emptyMessage {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #aaa;
+    font-family: sans-serif;
+    font-size: 13px;
+}

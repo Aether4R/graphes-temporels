@@ -76,6 +76,7 @@ function setup() {
         rebuildSnapshotBar();
         display();
         document.getElementById('modalOverlay').classList.add('hidden');
+        updateEmptyMessage();
     };
 
     document.getElementById('btnCancel').onclick = () => {
@@ -126,6 +127,7 @@ function initSimulation() {
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
     document.getElementById('snapshotBar').innerHTML = '';
+    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
     // Créer le buffer pour cacher le lattice
@@ -140,6 +142,7 @@ function initSimulation() {
 
     display();
     updateConnexityIndicator();
+    updateEmptyMessage();
 }
 
 /**
@@ -353,6 +356,7 @@ function rebuildSnapshotBar() {
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
     document.getElementById('snapshotBar').innerHTML = '';
+    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
 
     let count = lattice.snapshots.length - 1;
     for (let t = 0; t < count; t++) {
@@ -382,6 +386,15 @@ function addSnapshot() {
 
     addSnapshotSlot(lattice.snapshots[lattice.snapshots.length - 2], lattice.snapshots.length - 1);
     updateConnexityIndicator();
+    updateEmptyMessage();
+}
+
+/**
+ * Met à jour le message affiché dans la barre de snapshots lorsque celle-ci est vide
+ */
+function updateEmptyMessage() {
+    const msg = document.getElementById('emptyMessage');
+    msg.style.display = lattice.snapshots.length <= 1 ? 'flex' : 'none';
 }
 
 /**
@@ -430,8 +443,16 @@ function loadSession() {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const data = JSON.parse(e.target.result);
-            applySession(data);
+            try {
+                const data = JSON.parse(e.target.result);
+
+                if (!isValid(data)) {
+                    return;
+                }
+                applySession(data);
+            } catch (err) {
+                alert("Erreur lors du chargement du fichier : " + err.message);
+            }
         };
         reader.readAsText(file);
     }
@@ -452,6 +473,7 @@ function applySession(data) {
         for (let inst of snapshotP5Instances) inst.remove();
         snapshotP5Instances = [];
         document.getElementById('snapshotBar').innerHTML = '';
+        document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
 
         // Recréer le lattice et les graphes
         lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
@@ -478,6 +500,35 @@ function applySession(data) {
 }
 
 /**
+ * Teste la validité d'une session chargée en vérifiant que les snapshots ont une structure correcte
+ * @param {Object} data - Les données de la session à tester
+ * @returns {boolean} - true si la session est valide, false sinon
+ */
+function isValid(data){
+    const { N, snapshots } = data;
+    if (typeof N !== 'number' || N < 2 || N > inputN.attribute('max')) {
+        alert("Le champ N doit être un nombre supérieur ou égal à 2.");
+        return false;
+    }
+    if (!Array.isArray(snapshots)) {
+        alert("Le champ snapshots doit être un tableau.")
+        return false
+    }
+
+    if (snapshots.every(snapshot => 
+        snapshot.length === N && 
+        snapshot.every(row => 
+            row.length === N && 
+            row.every(cell => typeof cell === 'boolean')
+        ))) {
+        return true;
+    } else {
+        alert("Chaque snapshot doit être une matrice carrée de taille N x N contenant des valeurs booléennes.");
+        return false;
+    }
+}
+
+/**
  * Met à jour l'indicateur de connexité dans la sidebar en fonction de l'état de la snapshot actuelle
  */
 function updateConnexityIndicator() {
@@ -494,24 +545,35 @@ function updateConnexityIndicator() {
 
 // Gérer les raccourcis clavier
 document.addEventListener("keydown", (event) => {
-    // Ctrl + Shift + a pour ajouter une snapshot
+    // Ctrl + Shift + A pour ajouter une snapshot
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
         handleAdd();
     }
-    // Ctrl + z pour revenir à la snapshot précédente
+    // Ctrl + Z pour revenir à la snapshot précédente
     if (event.ctrlKey && event.key.toLowerCase() === "z") {
         event.preventDefault();
         handleBack();
     }
-    // Ctrl + Shift + s pour sauvegarder la session    
+    // Ctrl + Shift + S pour sauvegarder la session    
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "s") {
         event.preventDefault();
         saveSession();
     }
-    // Ctrl + Shift + o pour charger une session
+    // Ctrl + Shift + O pour charger une session
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
         event.preventDefault();
         loadSession();
     }
+});
+
+document.addEventListener("dblclick", (event) => {
+    if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) {
+        return;
+    }
+    // Réinitialiser le zoom et le pan sur un double-clic
+    zoomLevel = 1;
+    panX = 0;
+    panY = 0;
+    display();
 });
