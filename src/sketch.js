@@ -94,6 +94,16 @@ function setup() {
     if (el) {
         el.style.opacity = 0;
     }
+
+    let saveEl = document.getElementById('save-indicator');
+    if (saveEl) {
+        saveEl.style.opacity = 0;
+    }
+
+    let loadEl = document.getElementById('load-indicator');
+    if (loadEl) {
+        loadEl.style.opacity = 0;
+    }
 }
 
 /**
@@ -198,6 +208,11 @@ function mouseDragged() {
         return;
     }
 
+    // Vérifier que la modale n'est pas ouverte
+    if (!document.getElementById('modalOverlay').classList.contains('hidden')) {
+        return;
+    }
+
     let dx = mouseX - lastMouseX;
     let dy = mouseY - lastMouseY;
 
@@ -208,6 +223,8 @@ function mouseDragged() {
 
     lastMouseX = mouseX;
     lastMouseY = mouseY;
+
+    cursor('grabbing');
 
     display();
 }
@@ -427,6 +444,15 @@ function saveSession() {
         snapshots: lattice.snapshots.slice(0, -1).map(snap => snap.adj)
     };
     saveJSON(data, 'session.json');
+    let el = document.getElementById('save-indicator');
+    if (el) {
+        el.style.opacity = 1;
+
+        clearTimeout(mouseWheel._timer);
+        mouseWheel._timer = setTimeout(() => {
+            el.style.opacity = 0;
+        }, 1500);
+    }
 }
 
 /**
@@ -455,6 +481,15 @@ function loadSession() {
             }
         };
         reader.readAsText(file);
+        let el = document.getElementById('load-indicator');
+        if (el) {
+            el.style.opacity = 1;
+
+            clearTimeout(mouseWheel._timer);
+            mouseWheel._timer = setTimeout(() => {
+                el.style.opacity = 0;
+            }, 1500);
+        }
     }
 }
 
@@ -496,6 +531,7 @@ function applySession(data) {
 
         display();
         updateConnexityIndicator();
+        updateEmptyMessage();
     }
 }
 
@@ -564,6 +600,12 @@ document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
         event.preventDefault();
         loadSession();
+    }
+    // Echap pour fermer la modale de confirmation
+    if (event.key === "Escape") {
+        if (!document.getElementById('modalOverlay').classList.contains('hidden')) {
+            document.getElementById('modalOverlay').classList.add('hidden');
+        }
     }
 });
 
