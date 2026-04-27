@@ -106,7 +106,7 @@ class Graph {
             for (let j = i + 1; j < N; j++) {
                 if (distSegPoint(this.v[i], this.v[j], click) < CLICK_TRESHOLD) {
                     this.adj[i][j] = !this.adj[i][j];
-                    this.adj[j][i] = this.adj[j][i];
+                    this.adj[j][i] = this.adj[i][j];
                     updated = true;
                 }
             }

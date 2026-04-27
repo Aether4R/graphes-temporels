@@ -13,7 +13,8 @@ class Table {
             for (let v = 0; v < N; v++) {
                 for (let s = 0; s < S; s++) {
                     if (t.subsets[v][s] != null) {
-                        this.subsets[v][s] = new Subset(t.subsets[v][s]);
+                        this.subsets[v][s] = new Subset();
+                        this.subsets[v][s].copy(t.subsets[v][s]);
                     }
                 }
             }
