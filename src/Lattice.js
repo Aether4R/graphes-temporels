@@ -63,8 +63,8 @@ class Lattice{
         this.snapshots = [];
     }
 
-    display(p) {
-        this.tables[this.tables.length - 1].display(p);
+    display(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
+        this.tables[this.tables.length - 1].display(offsetX, offsetY, zoom, p);
         console.log(this.tables[this.tables.length - 1].phi());
     }
 

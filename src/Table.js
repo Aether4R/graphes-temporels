@@ -21,12 +21,13 @@ class Table {
         }
     }
 
-    display(p = null) {
-        this.displayLinks(p);
+    display(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
+        this.displayLinks(offsetX, offsetY, zoom, p);
+
         for (let v = 0; v < N; v++) {
             for (let s = 0; s < S; s++) {
                 if (this.subsets[v][s] != null) {
-                    this.subsets[v][s].display(p);
+                    this.subsets[v][s].display(offsetX, offsetY, zoom, p);
                 }
             }
         }
@@ -34,29 +35,64 @@ class Table {
 
     /**
      * Affiche les liens entre les subsets
-     * @param {*} p 
+     * @param {number} offsetX - L'offset en X pour l'affichage
+     * @param {number} offsetY - L'offset en Y pour l'affichage
+     * @param {number} zoom - Le niveau de zoom pour l'affichage
+     * @param {object} p - Le contexte de dessin (par défaut, le contexte global)
      */
-    displayLinks(p = null) {
-        const ctx = p || window;
-        for (let v = 0; v < N; v++){
-            for (let s = 0; s < S; s++){
+    displayLinks(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
+
+        const ctx = p;
+
+        for (let v = 0; v < N; v++) {
+            for (let s = 0; s < S; s++) {
+
                 let child = this.subsets[v][s];
-                if (child != null){
-                    ctx.stroke(child.fresh ? ctx.color(255, 0, 0) : ctx.color(128));
+
+                if (child != null && child.parent != null) {
+
                     let parent = child.parent;
-                    if (parent != null){
-                        if (child.y != parent.y) {
-                            ctx.line(parent.x, parent.y - parent.size / 2, child.x, child.y + child.size / 2);
-                        } else {
-                            let d = abs(parent.x - child.x) / 2;
-                            let h = d / 2;
-                            let r = (d * d + h * h) / 2 / h;
-                            let alpha = atan2(d, r - h);
-                            ctx.ellipseMode(RADIUS);
-                            ctx.noFill();
-                            ctx.arc((parent.x + child.x) / 2, child.y - r + h + child.size / 2, r, r, HALF_PI - alpha, HALF_PI + alpha);
-                            ctx.ellipseMode(CENTER);
-                        }
+
+                    let x1 = parent.x * zoom + offsetX;
+                    let y1 = parent.y * zoom + offsetY;
+
+                    let x2 = child.x * zoom + offsetX;
+                    let y2 = child.y * zoom + offsetY;
+
+                    let size1 = parent.size * zoom;
+                    let size2 = child.size * zoom;
+
+                    ctx.stroke(child.fresh ? 'red' : 128);
+                    ctx.noFill();
+
+                    if (child.y !== parent.y) {
+                        ctx.line(
+                            x1,
+                            y1 - size1 / 2,
+                            x2,
+                            y2 + size2 / 2
+                        );
+                    } else {
+                        let d = abs(x2 - x1) / 2;
+                        let h = d / 2;
+
+                        if (h < 1) h = 1;
+
+                        let r = (d * d + h * h) / (2 * h);
+
+                        let alpha = atan2(d, r - h);
+
+                        let cx = (x1 + x2) / 2;
+                        let cy = y1 - r + h + size1 / 2;
+
+                        ctx.arc(
+                            cx,
+                            cy,
+                            2 * r,
+                            2 * r,
+                            HALF_PI - alpha,
+                            HALF_PI + alpha
+                        );
                     }
                 }
             }

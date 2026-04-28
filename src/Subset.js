@@ -27,38 +27,43 @@ class Subset {
         this.fresh = s.fresh;
     }
 
-    display(p = null) {
-        const ctx = p || window;
+    display(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
+        const ctx = p;
+
+        let X = this.x * zoom + offsetX;
+        let Y = this.y * zoom + offsetY;
+        let size = this.size * zoom;
+
         let transp = this.hops === INF ? 127 : 255;
 
         ctx.stroke(0, transp);
         ctx.noFill();
         ctx.rectMode(CENTER);
-        ctx.square(this.x, this.y, this.size);
+        ctx.square(X, Y, size);
 
-        let r = 0.35 * this.size;
+        let r = 0.35 * size;
 
         for (let i = 0; i < N; i++) {
+
+            let cx = X + r * cos(i * TWO_PI / N);
+            let cy = Y + r * sin(i * TWO_PI / N);
+
             if (((this.bits >> i) & 1) === 1) {
                 ctx.noStroke();
-                ctx.fill(i === this.current ? ctx.color(0, 150, 255, transp) : ctx.color(0, transp));
+                ctx.fill(i === this.current ? ctx.color(0,150,255,transp) : ctx.color(0,transp));
             } else {
                 ctx.stroke(0, transp);
                 ctx.noFill();
             }
 
-            ctx.circle(
-                this.x + r * cos(i * TWO_PI / N),
-                this.y + r * sin(i * TWO_PI / N),
-                0.2 * this.size
-            );
+            ctx.circle(cx, cy, 0.2 * size);
         }
 
         if (this.hops < INF) {
             ctx.textAlign(CENTER, CENTER);
-            ctx.textSize(0.3 * this.size);
-            ctx.fill(this.fresh ? ctx.color(255, 0, 0) : ctx.color(0));
-            ctx.text(this.hops, this.x, this.y);
+            ctx.textSize(max(10, 0.3 * size));
+            ctx.fill(this.fresh ? 'red' : 0);
+            ctx.text(this.hops, X, Y);
         }
     }
 }

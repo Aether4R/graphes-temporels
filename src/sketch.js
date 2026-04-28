@@ -11,8 +11,6 @@ let panX = 0, panY = 0;
 let isPanning = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
-let latticeBuffer;
-let lastDrawnTableIndex = -1;
 let dragOnEdge = false;
 
 let snapshotP5Instances = [];
@@ -262,9 +260,6 @@ function windowResized() {
 
     rebuildLatticePositions();
 
-    latticeBuffer = createGraphics(lattice.w, lattice.h);
-    lastDrawnTableIndex = -1;
-
     panX = 0;
     panY = 0;
     zoomLevel = 1;
@@ -348,8 +343,6 @@ function initSimulation() {
     document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
-    latticeBuffer = createGraphics(lattice.w, lattice.h);
-    lastDrawnTableIndex = -1;
 
     snapshot = new Graph(0, 0, 0);
     lattice.addSnapshot(snapshot);
@@ -451,23 +444,12 @@ function mouseMoved() {
  * Redessine le canvas principal : lattice sur le buffer, puis affichage avec pan/zoom
  */
 function display() {
-    let currentTableIndex = lattice.tables.length - 1;
-    if (currentTableIndex !== lastDrawnTableIndex) {
-        latticeBuffer.background(255);
-        latticeBuffer.push();
-        lattice.display(latticeBuffer);
-        latticeBuffer.pop();
-        lastDrawnTableIndex = currentTableIndex;
-    }
-
     background(255);
-    push();
-    let offsetX = (width - lattice.w) / 2;
-    let offsetY = (height - lattice.h) / 2;
-    translate(offsetX + panX, offsetY + panY);
-    scale(zoomLevel);
-    image(latticeBuffer, 0, 0, lattice.w, lattice.h);
-    pop();
+
+    let offsetX = (width - lattice.w) / 2 + panX;
+    let offsetY = (height - lattice.h) / 2 + panY;
+
+    lattice.display(offsetX, offsetY, zoomLevel);
 
     updateSidebarGraph();
 }
@@ -663,8 +645,6 @@ function applySession(data) {
         document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
 
         lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
-        latticeBuffer = createGraphics(lattice.w, lattice.h);
-        lastDrawnTableIndex = -1;
 
         for (let adj of data.snapshots) {
             let snap = new Graph(0, 0, 0);
