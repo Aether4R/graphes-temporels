@@ -55,6 +55,7 @@ class Table {
                             ctx.ellipseMode(RADIUS);
                             ctx.noFill();
                             ctx.arc((parent.x + child.x) / 2, child.y - r + h + child.size / 2, r, r, HALF_PI - alpha, HALF_PI + alpha);
+                            ctx.ellipseMode(CENTER);
                         }
                     }
                 }
