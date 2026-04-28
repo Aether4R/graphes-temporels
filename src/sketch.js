@@ -148,6 +148,9 @@ function setup() {
     let cnv = createCanvas(w, h);
     cnv.parent('canvasContainer');
 
+    cnv.elt.style.width = '100%';
+    cnv.elt.style.height = '100%';
+
     new p5(sidebarSketch);
     snapshotP5 = new p5(snapshotSketch);
 

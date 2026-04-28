@@ -177,8 +177,7 @@ button.disabled {
     min-height: 0;
     overflow: hidden;
     background: #fafafa;
-    display: flex;
-    outline: 2px solid red;
+    display: block;
 }
 
 #canvasContainer canvas {
