@@ -62,7 +62,7 @@ class Table {
                     let size1 = parent.size * zoom;
                     let size2 = child.size * zoom;
 
-                    ctx.stroke(child.fresh ? 'red' : 128);
+                    ctx.stroke(child.fresh ? 'red' : 'black');
                     ctx.noFill();
 
                     if (child.y !== parent.y) {
@@ -109,6 +109,7 @@ class Table {
             for (let s = 0; s < S; s++) {
                 if (this.subsets[v][s] != null) {
                     next.subsets[v][s].copy(this.subsets[v][s]);
+                    next.subsets[v][s].fresh = false;
                 }
             }
         }
