@@ -374,6 +374,8 @@ function updateN() {
         if (newN >= int(inputN.attribute('min')) && newN <= int(inputN.attribute('max'))) {
             N = newN;
             initSimulation();
+            backBtn.classList.add("disabled");
+            backBtn.classList.remove("enabled");
         }
     }, 300);
 }
