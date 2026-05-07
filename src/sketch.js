@@ -174,6 +174,7 @@ function setup() {
     backBtn.classList.add("disabled");
     saveBtn.classList.add("enabled");
     loadBtn.classList.add("enabled");
+    helpBtn.classList.add("enabled");
 
     document.getElementById('btnConfirm').onclick = () => {
         lattice.tables.pop();
@@ -189,6 +190,14 @@ function setup() {
 
     document.getElementById('btnCancel').onclick = () => {
         document.getElementById('modalOverlay').classList.add('hidden');
+    };
+
+    document.getElementById('helpBtn').onclick = () => {
+        document.getElementById('helpOverlay').classList.remove('hidden');
+    };
+
+    document.getElementById('helpClose').onclick = () => {
+        document.getElementById('helpOverlay').classList.add('hidden');
     };
 
     document.getElementById('snapshotBar').addEventListener('wheel', (e) => {

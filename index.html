@@ -22,6 +22,7 @@
     <button id="saveBtn" data-tooltip="Sauvegarder une session (Ctrl+Shift+S)">SAVE</button>
     <button id="loadBtn" data-tooltip="Charger une session (Ctrl+Shift+O)">LOAD</button>
     <input type="file" id="fileInput" style="display: none;" accept=".json" />
+    <button id="helpBtn" data-tooltip="Aide">?</button>
   </div>
 
   <div class="main">
@@ -42,6 +43,24 @@
         <button id="btnConfirm" class="enabled">Confirmer</button>
         <button id="btnCancel" class="enabled">Annuler</button>
       </div>
+    </div>
+  </div>
+
+  <div id="helpOverlay" class="hidden">
+    <div id="helpBox">
+      <h2>Aide</h2>
+      <hr>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis hendrerit nisl. 
+        Quisque porttitor dui nec urna vestibulum congue ac non quam. Integer egestas ullamcorper orci sed 
+        cursus. Cras vitae augue in velit elementum pretium. Curabitur eget quam sed massa pellentesque 
+        consequat a id leo. Nullam hendrerit lacus eu tortor commodo euismod. Vestibulum pulvinar eros sed 
+        justo ultrices tincidunt a vel purus. Pellentesque non fermentum mi. </br>
+
+        Morbi quam mauris, suscipit vitae est pharetra, rutrum blandit orci. Aliquam venenatis nibh urna, 
+        vitae iaculis nisl volutpat et. Ut consectetur non mi non interdum. Proin consectetur mollis 
+        convallis. Aliquam vitae enim nisl. Quisque eu erat erat. Nulla pellentesque risus ac sodales 
+        egestas. Nullam varius lacus non ullamcorper porttitor.
+      </p>
+      <button id="helpClose" class="enabled" style="width:auto; padding:10px 24px;">Fermer</button>
     </div>
   </div>
 
