@@ -150,4 +150,21 @@ class Table {
         }
         return sum;
     }
+
+    visitedRows() {
+        let rows = Array(N).fill(false);
+
+        for (let v = 0; v < N; v++) {
+            for (let s = 0; s < S; s++) {
+                let sub = this.subsets[v][s];
+
+                if (sub && sub.hops < INF) {
+                    let c = oneCount(sub.bits >> 1);
+                    rows[c] = true;
+                }
+            }
+        }
+
+        return rows;
+    }
 }

@@ -22,7 +22,10 @@
     <button id="saveBtn" data-tooltip="Sauvegarder une session (Ctrl+Shift+S)">SAVE</button>
     <button id="loadBtn" data-tooltip="Charger une session (Ctrl+Shift+O)">LOAD</button>
     <input type="file" id="fileInput" style="display: none;" accept=".json" />
-    <button id="helpBtn" data-tooltip="Aide">?</button>
+    <div class="icon-btn-row">
+      <button id="helpBtn" data-tooltip="Aide">?</button>
+      <button id="snapshotBtn" data-tooltip="afficher les graphes connexe qui ne visitent pas un nouveau sommet">⊙</button>
+    </div>
   </div>
 
   <div class="main">
@@ -61,6 +64,17 @@
         egestas. Nullam varius lacus non ullamcorper porttitor.
       </p>
       <button id="helpClose" class="enabled" style="width:auto; padding:10px 24px;">Fermer</button>
+    </div>
+  </div>
+
+  <div id="snapshotOverlay" class="hidden">
+    <div id="snapshotBox">
+      <h2>Graphes connexes</h2>
+      <hr>
+      <div id="snapshotContent">
+        <!-- Les graphes connexes seront affichés ici -->
+      </div>
+      <button id="snapshotClose" class="enabled" style="width:auto; padding:10px 24px;">Fermer</button>
     </div>
   </div>
 

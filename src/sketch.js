@@ -175,6 +175,7 @@ function setup() {
     saveBtn.classList.add("enabled");
     loadBtn.classList.add("enabled");
     helpBtn.classList.add("enabled");
+    snapshotBtn.classList.add("enabled");
 
     document.getElementById('btnConfirm').onclick = () => {
         lattice.tables.pop();
@@ -200,6 +201,15 @@ function setup() {
         document.getElementById('helpOverlay').classList.add('hidden');
     };
 
+    document.getElementById('snapshotBtn').onclick = () => {
+        showInterestingGraphs();
+        document.getElementById('snapshotOverlay').classList.remove('hidden');
+    };
+
+    document.getElementById('snapshotClose').onclick = () => {
+        document.getElementById('snapshotOverlay').classList.add('hidden');
+    };
+
     document.getElementById('snapshotBar').addEventListener('wheel', (e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -217,13 +227,11 @@ document.querySelectorAll('.sidebar button[data-tooltip]').forEach(btn => {
         const rect = btn.getBoundingClientRect();
         const sidebarWidth = document.querySelector('.sidebar').offsetWidth;
         
-        // Crée un tooltip dans le DOM au lieu du ::after
         const tip = document.createElement('div');
         tip.id = 'dynamic-tooltip';
         tip.textContent = btn.dataset.tooltip;
         document.body.appendChild(tip);
 
-        // Positionne verticalement en évitant le débordement
         let top = rect.top + rect.height / 2;
         tip.style.cssText = `
             position: fixed;
@@ -240,7 +248,6 @@ document.querySelectorAll('.sidebar button[data-tooltip]').forEach(btn => {
             top: ${top}px;
         `;
 
-        // Correction si ça dépasse en bas
         const tipRect = tip.getBoundingClientRect();
         if (tipRect.bottom > window.innerHeight - 8) {
             tip.style.top = 'auto';
@@ -719,6 +726,109 @@ function updateConnexityIndicator() {
     }
 }
 
+/**
+ * Génère tous les graphes connexes à N-1 arêtes
+ */
+function generateConnectedGraphs() {
+    let graphs = [];
+
+    let edges = [];
+
+    for (let i = 0; i < N; i++) {
+        for (let j = i + 1; j < N; j++) {
+            edges.push([i, j]);
+        }
+    }
+
+    function backtrack(start, chosen) {
+
+        if (chosen.length === N - 1) {
+            let g = new Graph(0, 0, 0);
+
+            for (let [u, v] of chosen) {
+                g.adj[u][v] = true;
+                g.adj[v][u] = true;
+            }
+
+            if (g.isConnected()) {
+                graphs.push(g);
+            }
+
+            return;
+        }
+
+        for (let i = start; i < edges.length; i++) {
+            chosen.push(edges[i]);
+            backtrack(i + 1, chosen);
+            chosen.pop();
+        }
+    }
+
+    backtrack(0, []);
+
+    return graphs;
+}
+
+/**
+ * Vérifie si appliquer ce graphe visite une nouvelle rangée
+ */
+function createsNewRow(graph) {
+    let current = lattice.tables[lattice.tables.length - 1];
+    let before = current.visitedRows();
+    let next = new Table(current);
+
+    current.updateNext(graph, next);
+
+    let after = next.visitedRows();
+
+    for (let i = 0; i < N; i++) {
+        if (!before[i] && after[i]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function showInterestingGraphs() {
+    const container = document.getElementById('snapshotContent');
+    container.innerHTML = '';
+    let graphs = generateConnectedGraphs();
+    let filtered = graphs.filter(g => !createsNewRow(g));
+
+    if (filtered.length === 0) {
+
+        container.innerHTML = `
+            <div id="emptySnapshotMessage">
+                Aucun graphe trouvé
+            </div>
+        `;
+
+        return;
+    }
+
+    for (let g of filtered) {
+
+        let div = document.createElement('div');
+        div.className = 'snapshot-slot';
+        container.appendChild(div);
+
+        new p5((p) => {
+            p.setup = function () {
+                let c = p.createCanvas(160, 140);
+                c.parent(div);
+                g.setPos(80, 70, 50);
+                p.noLoop();
+            };
+
+            p.draw = function () {
+                p.background(255);
+                g.display(p);
+            };
+        });
+    }
+}
+
 document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "a") {
         event.preventDefault();
@@ -739,6 +849,16 @@ document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
         if (!document.getElementById('modalOverlay').classList.contains('hidden')) {
             document.getElementById('modalOverlay').classList.add('hidden');
+        }
+    }
+    if (event.key === "Escape") {
+        if (!document.getElementById('helpOverlay').classList.contains('hidden')) {
+            document.getElementById('helpOverlay').classList.add('hidden');
+        }
+    }
+    if (event.key === "Escape") {
+        if (!document.getElementById('snapshotOverlay').classList.contains('hidden')) {
+            document.getElementById('snapshotOverlay').classList.add('hidden');
         }
     }
 });
