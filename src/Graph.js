@@ -34,32 +34,31 @@ class Graph {
     }
 
     display(p = window) {
-        p.fill(0);
+        const colors = getThemeColors();
         p.ellipseMode(p.CENTER);
         p.textAlign(p.CENTER, p.CENTER);
         p.textSize(10);
-        
+    
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                // Vérifier si l'arête est survolée pour la mettre en évidence
                 let isHovered = this.hoveredEdges.some(e => e[0] === i && e[1] === j);
                 if (isHovered) {
-                    p.stroke(140);
+                    p.stroke(140, 140, 140);
                     p.strokeWeight(1.5);
                 } else {
-                    p.stroke(this.adj[i][j] ? 0 : 191);
+                    p.stroke(...(this.adj[i][j] ? colors.text : colors.textLight));
                     p.strokeWeight(1);
                 }
 
                 if (this.adj[i][j] || this.displayMissing) {
                     p.line(this.v[i].x, this.v[i].y, this.v[j].x, this.v[j].y);
-                    
+                
                     if (this.edgeTimes[i][j] && this.edgeTimes[i][j].length > 0) {
                         let midX = (this.v[i].x + this.v[j].x) / 2;
                         let midY = (this.v[i].y + this.v[j].y) / 2;
-                        
+                    
                         let timeStr = this.edgeTimes[i][j].join(',');
-                        p.fill('red');
+                        p.fill(...colors.fresh);
                         p.noStroke();
                         p.text(timeStr, midX, midY - 8);
                     }
@@ -67,7 +66,7 @@ class Graph {
                 p.noStroke();
                 p.strokeWeight(1);
             }
-            p.fill(0);
+            p.fill(...colors.text);
             p.circle(this.v[i].x, this.v[i].y, 0.1 * this.r);
         }
     }

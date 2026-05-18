@@ -44,7 +44,6 @@ let sidebarSketch = (p) => {
     };
 
     p.draw = function () {
-        p.background(255);
         if (sidebarGraph) {
             let cx = p.width / 2;
             let cy = p.height / 2;
@@ -82,7 +81,6 @@ let snapshotSketch = (p) => {
     };
 
     p.draw = function () {
-        p.background(255);
         if (snapshot) {
             let cx = p.width / 2;
             let cy = p.height / 2;
@@ -139,6 +137,21 @@ function repositionSnapshot(p) {
     let cy = p.height / 2;
     let r = 0.38 * Math.min(p.width, p.height);
     snapshot.setPos(cx, cy, r);
+}
+
+/**
+ * Retourne un objet avec les couleurs adaptées au thème actuel
+ */
+function getThemeColors() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    return {
+        isDark,
+        text: isDark ? [226, 232, 240] : [0, 0, 0],           // e2e8f0 ou noir
+        textLight: isDark ? [148, 163, 184] : [191, 191, 191], // 94a3b8 ou gris
+        accent: [59, 130, 246],                                 // bleu (3b82f6)
+        fresh: [239, 68, 68],                                   // rouge (ef4444)
+        border: isDark ? [51, 65, 85] : [0, 0, 0]              // 334155 ou noir
+    };
 }
 
 function setup() {
@@ -220,6 +233,28 @@ function setup() {
         let el = document.getElementById(id);
         if (el) el.style.opacity = 0;
     });
+
+    const toggle = document.getElementById("themeToggle");
+
+    function setTheme(isDark) {
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+    
+        snapshotP5Instances.forEach(inst => inst.redraw?.());
+        display();
+    }
+
+    toggle.addEventListener("change", () => {
+        setTheme(toggle.checked);
+    });
+
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark") {
+        toggle.checked = true;
+        setTheme(true);
+    } else {
+        setTheme(false);
+    }
 }
 
 document.querySelectorAll('.sidebar button[data-tooltip]').forEach(btn => {
@@ -388,10 +423,20 @@ function updateN() {
 }
 
 /**
+ * Retourne true si une modale est actuellement ouverte
+ * @returns {boolean}
+ */
+function isModalOpen() {
+    const modals = ['modalOverlay', 'helpOverlay', 'snapshotOverlay'];
+    return modals.some(id => !document.getElementById(id).classList.contains('hidden'));
+}
+
+/**
  * Gère le clic de souris sur le canvas principal pour initier le pan
  */
 function mousePressed() {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) return;
+    if (isModalOpen()) return;
     dragOnEdge = false;
     isPanning = true;
     lastMouseX = mouseX;
@@ -403,7 +448,7 @@ function mousePressed() {
  */
 function mouseDragged() {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) return;
-    if (!document.getElementById('modalOverlay').classList.contains('hidden')) return;
+    if (isModalOpen()) return;
     if (dragOnEdge) return;
 
     let dx = mouseX - lastMouseX;
@@ -432,6 +477,13 @@ function mouseReleased() {
  */
 function mouseWheel(event) {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) return;
+    if (isModalOpen()){
+        if (document.getElementById('snapshotOverlay')) {
+            return true;
+        } else {
+            return false;
+        }
+    };
 
     let zoomFactor = event.delta > 0 ? 0.9 : 1.1;
     panX = mouseX - zoomFactor * (mouseX - panX);
@@ -462,7 +514,18 @@ function mouseMoved() {
  * Redessine le canvas principal : lattice sur le buffer, puis affichage avec pan/zoom
  */
 function display() {
-    background(255);
+    // Récupérer et convertir la couleur CSS en RGB
+    const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim();
+    let r = 255, g = 255, b = 255; // défaut blanc
+    
+    if (cssColor.startsWith('#')) {
+        const hex = cssColor.substring(1);
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+    }
+    
+    background(r, g, b);
 
     let offsetX = (width - lattice.w) / 2 + panX;
     let offsetY = (height - lattice.h) / 2 + panY;
@@ -470,6 +533,10 @@ function display() {
     lattice.display(offsetX, offsetY, zoomLevel);
 
     updateSidebarGraph();
+}
+
+function draw() {
+    display();
 }
 
 /**
@@ -522,7 +589,6 @@ function addSnapshotSlot(snap, t) {
             p.noLoop();
         };
         p.draw = function () {
-            p.background(255);
             snap.display(p);
         };
     });
@@ -797,18 +863,15 @@ function showInterestingGraphs() {
     let filtered = graphs.filter(g => !createsNewRow(g));
 
     if (filtered.length === 0) {
-
         container.innerHTML = `
             <div id="emptySnapshotMessage">
                 Aucun graphe trouvé
             </div>
         `;
-
         return;
     }
 
     for (let g of filtered) {
-
         let div = document.createElement('div');
         div.className = 'snapshot-slot';
         container.appendChild(div);
@@ -822,7 +885,15 @@ function showInterestingGraphs() {
             };
 
             p.draw = function () {
-                p.background(255);
+                const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-canvas').trim();
+                let bgR = 255, bgG = 255, bgB = 255;
+                if (cssColor.startsWith('#')) {
+                    const hex = cssColor.substring(1);
+                    bgR = parseInt(hex.substring(0, 2), 16);
+                    bgG = parseInt(hex.substring(2, 4), 16);
+                    bgB = parseInt(hex.substring(4, 6), 16);
+                }
+                p.background(bgR, bgG, bgB);
                 g.display(p);
             };
         });
@@ -865,6 +936,7 @@ document.addEventListener("keydown", (event) => {
 
 document.addEventListener("dblclick", (event) => {
     if (mouseY > height || mouseY < 0 || mouseX < 0 || mouseX > width) return;
+    if (isModalOpen()) return;
     zoomLevel = 1;
     panX = 0;
     panY = 0;

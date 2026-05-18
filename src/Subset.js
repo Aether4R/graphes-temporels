@@ -28,6 +28,7 @@ class Subset {
     }
 
     display(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
+        const colors = getThemeColors();
         const ctx = p;
 
         let X = this.x * zoom + offsetX;
@@ -36,7 +37,7 @@ class Subset {
 
         let transp = this.hops === INF ? 127 : 255;
 
-        ctx.stroke(0, transp);
+        ctx.stroke(...colors.border, transp);
         ctx.noFill();
         ctx.rectMode(CENTER);
         ctx.square(X, Y, size);
@@ -44,15 +45,14 @@ class Subset {
         let r = 0.35 * size;
 
         for (let i = 0; i < N; i++) {
-
             let cx = X + r * cos(i * TWO_PI / N);
             let cy = Y + r * sin(i * TWO_PI / N);
 
             if (((this.bits >> i) & 1) === 1) {
                 ctx.noStroke();
-                ctx.fill(i === this.current ? ctx.color(0,150,255,transp) : ctx.color(0,transp));
+                ctx.fill(i === this.current ? ctx.color(...colors.accent, transp) : ctx.color(...colors.text, transp));
             } else {
-                ctx.stroke(0, transp);
+                ctx.stroke(...colors.text, transp);
                 ctx.noFill();
             }
 
@@ -62,7 +62,7 @@ class Subset {
         if (this.hops < INF) {
             ctx.textAlign(CENTER, CENTER);
             ctx.textSize(max(10, 0.3 * size));
-            ctx.fill(this.fresh ? 'red' : 0);
+            ctx.fill(...(this.fresh ? colors.fresh : colors.text));
             ctx.text(this.hops, X, Y);
         }
     }

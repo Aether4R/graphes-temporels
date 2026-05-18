@@ -41,16 +41,14 @@ class Table {
      * @param {object} p - Le contexte de dessin (par défaut, le contexte global)
      */
     displayLinks(offsetX = 0, offsetY = 0, zoom = 1, p = window) {
-
+        const colors = getThemeColors();
         const ctx = p;
 
         for (let v = 0; v < N; v++) {
             for (let s = 0; s < S; s++) {
-
                 let child = this.subsets[v][s];
 
                 if (child != null && child.parent != null) {
-
                     let parent = child.parent;
 
                     let x1 = parent.x * zoom + offsetX;
@@ -62,7 +60,7 @@ class Table {
                     let size1 = parent.size * zoom;
                     let size2 = child.size * zoom;
 
-                    ctx.stroke(child.fresh ? 'red' : 'black');
+                    ctx.stroke(...(child.fresh ? colors.fresh : colors.text));
                     ctx.noFill();
 
                     if (child.y !== parent.y) {
