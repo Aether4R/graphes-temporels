@@ -44,6 +44,15 @@ let sidebarSketch = (p) => {
     };
 
     p.draw = function () {
+        const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim();
+        let r = 247, g = 250, b = 252;
+        if (cssColor.startsWith('#')) {
+            const hex = cssColor.substring(1);
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        }
+        p.background(r, g, b);
         if (sidebarGraph) {
             let cx = p.width / 2;
             let cy = p.height / 2;
@@ -535,6 +544,9 @@ function display() {
     updateSidebarGraph();
 }
 
+/** 
+ * Redessine le canvas principal à chaque frame afin d'update instantément le canvas
+ */
 function draw() {
     display();
 }
@@ -554,8 +566,12 @@ function updateSidebarGraph() {
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
                 if (snap.adj[i][j]) {
-                    sidebarGraph.edgeTimes[i][j].push(t + 1);
-                    sidebarGraph.edgeTimes[j][i].push(t + 1);
+                    if (!sidebarGraph.edgeTimes[i][j].includes(t + 1)) {
+                        sidebarGraph.edgeTimes[i][j].push(t + 1);
+                    }
+                    if (!sidebarGraph.edgeTimes[j][i].includes(t + 1)) {
+                        sidebarGraph.edgeTimes[j][i].push(t + 1);
+                    }
                     sidebarGraph.adj[i][j] = true;
                     sidebarGraph.adj[j][i] = true;
                 }

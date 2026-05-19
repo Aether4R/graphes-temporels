@@ -56,11 +56,23 @@ class Graph {
                     if (this.edgeTimes[i][j] && this.edgeTimes[i][j].length > 0) {
                         let midX = (this.v[i].x + this.v[j].x) / 2;
                         let midY = (this.v[i].y + this.v[j].y) / 2;
-                    
+
+                        // Décalage perpendiculaire à l'arête pour éviter les superpositions
+                        let dx = this.v[j].x - this.v[i].x;
+                        let dy = this.v[j].y - this.v[i].y;
+                        let len = Math.sqrt(dx * dx + dy * dy) || 1;
+                        // Perpendiculaire normalisée, toujours côté "gauche" de l'arête i→j
+                        let perpX = -dy / len;
+                        let perpY =  dx / len;
+                        // Si le vecteur perpendiculaire pointe vers le bas, on l'inverse
+                        // pour que le label soit toujours au-dessus visuellement
+                        if (perpY > 0) { perpX = -perpX; perpY = -perpY; }
+
+                        let offset = 10;
                         let timeStr = this.edgeTimes[i][j].join(',');
                         p.fill(...colors.fresh);
                         p.noStroke();
-                        p.text(timeStr, midX, midY - 8);
+                        p.text(timeStr, midX + perpX * offset, midY + perpY * offset);
                     }
                 }
                 p.noStroke();
