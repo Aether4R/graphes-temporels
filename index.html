@@ -3,28 +3,28 @@
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="css/style.css">
-  <title>Graphes Temporels</title>
+  <title>Temporal Graphs</title>
 </head>
 <body>
 
   <div class="sidebar">
-    <div class="graph-label">Graphe temporel</div>
+    <div class="graph-label">Temporal Graph</div>
     <div id="graphContainer"></div>
-    <div class="graph-label">Snapshot éditable</div>
+    <div class="graph-label">Current Snapshot</div>
     <div id="snapshotGraphContainer"></div>
     <div id="spinboxContainer">N = </div>
     <div id="connexityIndicator">
       <span id="connexityDot"></span>
-      <span id="connexityText">non connexe</span>
+      <span id="connexityText">Not Connected</span>
     </div>
-    <button id="addBtn" data-tooltip="Ajouter une snapshot (Ctrl+Shift+A)">ADD</button>
-    <button id="backBtn" data-tooltip="Revenir à la snapshot précédente (Ctrl+Z)">BACK</button>
-    <button id="saveBtn" data-tooltip="Sauvegarder une session (Ctrl+Shift+S)">SAVE</button>
-    <button id="loadBtn" data-tooltip="Charger une session (Ctrl+Shift+O)">LOAD</button>
+    <button id="addBtn" data-tooltip="Add Snapshot (Ctrl+Shift+A)">ADD</button>
+    <button id="backBtn" data-tooltip="Go back to the previous snapshot (Ctrl+Z)">BACK</button>
+    <button id="saveBtn" data-tooltip="Save session (Ctrl+Shift+S)">SAVE</button>
+    <button id="loadBtn" data-tooltip="Load Session (Ctrl+Shift+O)">LOAD</button>
     <input type="file" id="fileInput" style="display: none;" accept=".json" />
     <div class="icon-btn-row">
-      <button id="helpBtn" data-tooltip="Aide">?</button>
-      <button id="snapshotBtn" data-tooltip="afficher les graphes connexe qui ne visitent pas un nouveau sommet">⊙</button>
+      <button id="helpBtn" data-tooltip="Help">?</button>
+      <button id="snapshotBtn" data-tooltip="Show connected trees that do not visit a new vertex">⊙</button>
     </div>
     <div class="theme-switch">
       <input type="checkbox" id="themeToggle" />
@@ -39,27 +39,27 @@
   <div class="main">
     <div id="canvasContainer">
       <div id="zoom-indicator">100%</div>
-      <div id="save-indicator">Session sauvegardée</div>
-      <div id="load-indicator">Session chargée</div>
+      <div id="save-indicator">Session saved</div>
+      <div id="load-indicator">Session loaded</div>
     </div>
     <div id="snapshotBar">
-      <div id="emptyMessage">Aucune snapshot pour le moment.</div>
+      <div id="emptyMessage">No snapshot available at the moment.</div>
     </div>
   </div>
 
   <div id="modalOverlay" class="hidden">
     <div id="modalBox">
-      <p>Voulez-vous vraiment revenir à la snapshot précédente ?</p>
+      <p>Do you really want to go back to the previous snapshot?</p>
       <div id="modalButtons">
-        <button id="btnConfirm" class="enabled">Confirmer</button>
-        <button id="btnCancel" class="enabled">Annuler</button>
+        <button id="btnConfirm" class="enabled">Confirm</button>
+        <button id="btnCancel" class="enabled">Cancel</button>
       </div>
     </div>
   </div>
 
   <div id="helpOverlay" class="hidden">
     <div id="helpBox">
-      <h2>Aide</h2>
+      <h2>Help</h2>
       <hr>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis hendrerit nisl. 
         Quisque porttitor dui nec urna vestibulum congue ac non quam. Integer egestas ullamcorper orci sed 
         cursus. Cras vitae augue in velit elementum pretium. Curabitur eget quam sed massa pellentesque 
@@ -71,18 +71,18 @@
         convallis. Aliquam vitae enim nisl. Quisque eu erat erat. Nulla pellentesque risus ac sodales 
         egestas. Nullam varius lacus non ullamcorper porttitor.
       </p>
-      <button id="helpClose" class="enabled" style="width:auto; padding:10px 24px;">Fermer</button>
+      <button id="helpClose" class="enabled" style="width:auto; padding:10px 24px;">Close</button>
     </div>
   </div>
 
   <div id="snapshotOverlay" class="hidden">
     <div id="snapshotBox">
-      <h2>Graphes connexes</h2>
+      <h2>Connected Trees</h2>
       <hr>
       <div id="snapshotContent">
         <!-- Les graphes connexes seront affichés ici -->
       </div>
-      <button id="snapshotClose" class="enabled" style="width:auto; padding:10px 24px;">Fermer</button>
+      <button id="snapshotClose" class="enabled" style="width:auto; padding:10px 24px;">Close</button>
     </div>
   </div>
 

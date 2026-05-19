@@ -90,6 +90,15 @@ let snapshotSketch = (p) => {
     };
 
     p.draw = function () {
+        const cssColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-surface').trim();
+        let r = 247, g = 250, b = 252;
+        if (cssColor.startsWith('#')) {
+            const hex = cssColor.substring(1);
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        }
+        p.background(r, g, b);
         if (snapshot) {
             let cx = p.width / 2;
             let cy = p.height / 2;
@@ -400,7 +409,7 @@ function initSimulation() {
 
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
-    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
+    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">No snapshot available at the moment.</div>';
 
     lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
 
@@ -619,7 +628,7 @@ function addSnapshotSlot(snap, t) {
 function rebuildSnapshotBar() {
     for (let inst of snapshotP5Instances) inst.remove();
     snapshotP5Instances = [];
-    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
+    document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">No snapshot available at the moment.</div>';
 
     let count = lattice.snapshots.length - 1;
     for (let t = 0; t < count; t++) {
@@ -715,7 +724,7 @@ function loadSession() {
                 if (!isValid(data)) return;
                 applySession(data);
             } catch (err) {
-                alert("Erreur lors du chargement du fichier : " + err.message);
+                alert("Error during file loading : " + err.message);
             }
         };
         reader.readAsText(file);
@@ -742,7 +751,7 @@ function applySession(data) {
 
         for (let inst of snapshotP5Instances) inst.remove();
         snapshotP5Instances = [];
-        document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">Aucune snapshot pour le moment.</div>';
+        document.getElementById('snapshotBar').innerHTML = '<div id="emptyMessage">No snapshot available at the moment.</div>';
 
         lattice = new Lattice(0, 0, 0.9 * width, 0.9 * height, 0.1 * height);
 
@@ -773,11 +782,11 @@ function applySession(data) {
 function isValid(data) {
     const { N, snapshots } = data;
     if (typeof N !== 'number' || N < 2 || N > inputN.attribute('max')) {
-        alert("Le champ N doit être un nombre supérieur ou égal à 2.");
+        alert("The field N must be a number greater than or equal to 2.");
         return false;
     }
     if (!Array.isArray(snapshots)) {
-        alert("Le champ snapshots doit être un tableau.");
+        alert("The field snapshots must be an array.");
         return false;
     }
     if (snapshots.every(snapshot =>
@@ -788,7 +797,7 @@ function isValid(data) {
         ))) {
         return true;
     } else {
-        alert("Chaque snapshot doit être une matrice carrée de taille N x N contenant des valeurs booléennes.");
+        alert("Each snapshot must be a square matrix of size N x N containing boolean values.");
         return false;
     }
 }
@@ -801,10 +810,10 @@ function updateConnexityIndicator() {
     const text = document.getElementById('connexityText');
     if (snapshot.isConnected()) {
         dot.className = 'connected';
-        text.textContent = 'Connexe';
+        text.textContent = 'Connected';
     } else {
         dot.className = 'disconnected';
-        text.textContent = 'Non connexe';
+        text.textContent = 'Not Connected';
     }
 }
 
@@ -881,7 +890,7 @@ function showInterestingGraphs() {
     if (filtered.length === 0) {
         container.innerHTML = `
             <div id="emptySnapshotMessage">
-                Aucun graphe trouvé
+                No tree found
             </div>
         `;
         return;
