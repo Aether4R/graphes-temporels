@@ -12,6 +12,7 @@ let isPanning = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let dragOnEdge = false;
+let lastSelectedSnapshotDiv = null;
 
 let snapshotP5Instances = [];
 let snapshotP5;
@@ -553,13 +554,6 @@ function display() {
     updateSidebarGraph();
 }
 
-/** 
- * Redessine le canvas principal à chaque frame afin d'update instantément le canvas
- */
-function draw() {
-    display();
-}
-
 /**
  * Met à jour le graphe de la sidebar en fonction des snapshots du lattice
  */
@@ -602,7 +596,7 @@ function addSnapshotSlot(snap, t) {
 
     const label = document.createElement('div');
     label.className = 'snapshot-label';
-    label.textContent = 'Temps ' + t;
+    label.textContent = 'Time ' + t;
     slot.appendChild(label);
     bar.appendChild(slot);
 
@@ -900,6 +894,26 @@ function showInterestingGraphs() {
         let div = document.createElement('div');
         div.className = 'snapshot-slot';
         container.appendChild(div);
+
+        div.addEventListener('click', () => {
+            if (lastSelectedSnapshotDiv) {
+                lastSelectedSnapshotDiv.style.cssText = '';
+            }
+    
+            div.style.cssText = 'border: 2px solid var(--graph-border);';
+            lastSelectedSnapshotDiv = div;
+    
+            for (let i = 0; i < N; i++) {
+                for (let j = 0; j < N; j++) {
+                    snapshot.adj[i][j] = g.adj[i][j];
+                }
+            }
+            lattice.update();
+            display();
+            updateConnexityIndicator();
+            document.getElementById('addBtn').classList.remove("disabled");
+            document.getElementById('addBtn').classList.add("enabled");
+        });
 
         new p5((p) => {
             p.setup = function () {
