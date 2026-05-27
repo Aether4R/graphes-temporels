@@ -43,7 +43,8 @@ class Graph {
             for (let j = i + 1; j < N; j++) {
                 let isHovered = this.hoveredEdges.some(e => e[0] === i && e[1] === j);
                 if (isHovered) {
-                    p.stroke(140, 140, 140);
+                    const colors = getThemeColors();
+                    p.stroke(colors.isDark ? [96, 165, 250] : [37, 99, 235]);
                     p.strokeWeight(1.5);
                 } else {
                     p.stroke(...(this.adj[i][j] ? colors.text : colors.textLight));
