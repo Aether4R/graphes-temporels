@@ -209,22 +209,6 @@ function setup() {
     helpBtn.classList.add("enabled");
     snapshotBtn.classList.add("enabled");
 
-    document.getElementById('btnConfirm').onclick = () => {
-        lattice.tables.pop();
-        lattice.tables.pop();
-        lattice.snapshots.pop();
-        lattice.snapshots.pop();
-        addSnapshot();
-        rebuildSnapshotBar();
-        display();
-        document.getElementById('modalOverlay').classList.add('hidden');
-        updateEmptyMessage();
-    };
-
-    document.getElementById('btnCancel').onclick = () => {
-        document.getElementById('modalOverlay').classList.add('hidden');
-    };
-
     document.getElementById('helpBtn').onclick = () => {
         document.getElementById('helpOverlay').classList.remove('hidden');
     };
@@ -446,7 +430,7 @@ function updateN() {
  * @returns {boolean}
  */
 function isModalOpen() {
-    const modals = ['modalOverlay', 'helpOverlay', 'snapshotOverlay'];
+    const modals = ['helpOverlay', 'snapshotOverlay'];
     return modals.some(id => !document.getElementById(id).classList.contains('hidden'));
 }
 
@@ -678,7 +662,13 @@ function handleAdd() {
  */
 function handleBack() {
     if (!backBtn.classList.contains("disabled")) {
-        document.getElementById('modalOverlay').classList.remove('hidden');
+        lattice.tables.pop();
+        lattice.tables.pop();
+        lattice.snapshots.pop();
+        lattice.snapshots.pop();
+        addSnapshot();
+        rebuildSnapshotBar();
+        display();
     }
 }
 
@@ -955,11 +945,6 @@ document.addEventListener("keydown", (event) => {
     if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === "o") {
         event.preventDefault();
         loadSession();
-    }
-    if (event.key === "Escape") {
-        if (!document.getElementById('modalOverlay').classList.contains('hidden')) {
-            document.getElementById('modalOverlay').classList.add('hidden');
-        }
     }
     if (event.key === "Escape") {
         if (!document.getElementById('helpOverlay').classList.contains('hidden')) {
