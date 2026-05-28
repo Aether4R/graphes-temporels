@@ -196,11 +196,13 @@ function setup() {
     backBtn = document.getElementById("backBtn");
     saveBtn = document.getElementById("saveBtn");
     loadBtn = document.getElementById("loadBtn");
+    resetBtn = document.getElementById("resetBtn");
 
     addBtn.onclick  = handleAdd;
     backBtn.onclick = handleBack;
     saveBtn.onclick = saveSession;
     loadBtn.onclick = loadSession;
+    resetBtn.onclick = handleReset;
 
     addBtn.classList.add("disabled");
     backBtn.classList.add("disabled");
@@ -208,6 +210,7 @@ function setup() {
     loadBtn.classList.add("enabled");
     helpBtn.classList.add("enabled");
     snapshotBtn.classList.add("enabled");
+    resetBtn.classList.add("enabled");
 
     document.getElementById('helpBtn').onclick = () => {
         document.getElementById('helpOverlay').classList.remove('hidden');
@@ -231,6 +234,10 @@ function setup() {
         e.preventDefault();
         document.getElementById('snapshotBar').scrollLeft += e.deltaY || e.deltaX;
     }, { passive: false });
+
+    document.getElementById('confirmResetBtn').onclick = confirmReset;
+    document.getElementById('cancelResetBtn').onclick = cancelReset;
+
 
     ['zoom-indicator', 'save-indicator', 'load-indicator'].forEach(id => {
         let el = document.getElementById(id);
@@ -430,7 +437,7 @@ function updateN() {
  * @returns {boolean}
  */
 function isModalOpen() {
-    const modals = ['helpOverlay', 'snapshotOverlay'];
+    const modals = ['helpOverlay', 'snapshotOverlay', 'resetOverlay'];
     return modals.some(id => !document.getElementById(id).classList.contains('hidden'));
 }
 
@@ -670,6 +677,20 @@ function handleBack() {
         rebuildSnapshotBar();
         display();
     }
+}
+
+function handleReset() {
+    document.getElementById('resetOverlay').classList.remove('hidden');
+}
+
+function confirmReset() {
+    document.getElementById('resetOverlay').classList.add('hidden');
+    initSimulation();
+    display();
+}
+
+function cancelReset() {
+    document.getElementById('resetOverlay').classList.add('hidden');
 }
 
 /**

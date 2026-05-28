@@ -21,6 +21,7 @@
     <button id="backBtn" data-tooltip="Go back to the previous snapshot (Ctrl+Z)">BACK</button>
     <button id="saveBtn" data-tooltip="Save session (Ctrl+Shift+S)">SAVE</button>
     <button id="loadBtn" data-tooltip="Load Session (Ctrl+Shift+O)">LOAD</button>
+    <button id="resetBtn" data-tooltip="Reset session (Ctrl+Shift+R)">RESET</button>
     <input type="file" id="fileInput" style="display: none;" accept=".json" />
     <div class="icon-btn-row">
       <button id="helpBtn" data-tooltip="Help">?</button>
@@ -73,6 +74,18 @@
         <!-- Les graphes connexes seront affichés ici -->
       </div>
       <button id="snapshotClose" class="enabled" style="width:auto; padding:10px 24px;">Close</button>
+    </div>
+  </div>
+
+  <div id="resetOverlay" class="hidden">
+    <div id="resetBox">
+      <h2>Reset Session</h2>
+      <hr>
+      <p>Are you sure you want to reset? All unsaved changes will be lost.</p>
+      <div style="display: flex; gap: 12px;">
+        <button id="confirmResetBtn" class="enabled" style="width:auto; padding:10px 24px;">Reset</button>
+        <button id="cancelResetBtn" class="enabled" style="width:auto; padding:10px 24px;">Cancel</button>
+      </div>
     </div>
   </div>
 
