@@ -1,5 +1,3 @@
-const CLICK_TRESHOLD = 10;
-
 class Graph {
     constructor(xc, yc, r) {
         this.adj = Array.from({ length: N }, () => Array(N).fill(false));
@@ -85,6 +83,14 @@ class Graph {
     }
 
     /**
+     * Retourne le seuil de clic pour détecter les interactions avec les arêtes
+     * @returns {number} - Le seuil de clic
+     */
+    getClickThreshold() {
+        return Math.max(5, Math.min(10, 50 / N));
+    }
+
+    /**
     * Met à jour l'état de survol des arêtes
     * @param {p5.Vector} mouse - La position de la souris
     * @returns {boolean} - true si l'état a changé, false sinon
@@ -94,7 +100,7 @@ class Graph {
         // Vérifier pour chaque arête si elle est survolée
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                if (distSegPoint(this.v[i], this.v[j], mouse) < CLICK_TRESHOLD) {
+                if (distSegPoint(this.v[i], this.v[j], mouse) < this.getClickThreshold()) {
                     newHovered.push([i, j]);
                 }
             }
@@ -116,7 +122,7 @@ class Graph {
         let updated = false;
         for (let i = 0; i < N; i++) {
             for (let j = i + 1; j < N; j++) {
-                if (distSegPoint(this.v[i], this.v[j], click) < CLICK_TRESHOLD) {
+                if (distSegPoint(this.v[i], this.v[j], click) < this.getClickThreshold()) {
                     this.adj[i][j] = !this.adj[i][j];
                     this.adj[j][i] = this.adj[i][j];
                     updated = true;

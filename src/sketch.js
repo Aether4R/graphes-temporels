@@ -679,16 +679,25 @@ function handleBack() {
     }
 }
 
+/**
+ * Affiche une confirmation avant de réinitialiser la simulation, pour éviter les pertes de données accidentelles
+ */
 function handleReset() {
     document.getElementById('resetOverlay').classList.remove('hidden');
 }
 
+/**
+ * Confirme la réinitialisation de la simulation en cachant la modale et en réinitialisant les données
+ */
 function confirmReset() {
     document.getElementById('resetOverlay').classList.add('hidden');
     initSimulation();
     display();
 }
 
+/** 
+ * Annule la réinitialisation de la simulation en cachant simplement la modale de confirmation
+ */
 function cancelReset() {
     document.getElementById('resetOverlay').classList.add('hidden');
 }
