@@ -1,0 +1,25 @@
+{
+  "name": "graphes-temporels",
+  "version": "1.0.0",
+  "description": "Visualisation de graphes temporels",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aether4R/graphes-temporels.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Aether4R/graphes-temporels/issues"
+  },
+  "homepage": "https://github.com/Aether4R/graphes-temporels#readme",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.7"
+  }
+}

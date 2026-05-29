@@ -23,16 +23,19 @@ function oneCount(x) {
     return count;
 }
 
-function binomial(n){
-    let row = [n + 1];
-    row[0] = row[1] = 1;
-    for (let i = 2; i <= n; i++){
-        let prev = row[0];
-        for (let j = 1; j <= i; j++){
-            let next = prev + row[j];
-            prev = row[j];
-            row[j] = next;
-        }
+export function binomial(n) {
+  let row = [1];
+
+  for (let i = 0; i < n; i++) {
+    let next = [1];
+
+    for (let j = 1; j < row.length; j++) {
+      next[j] = row[j - 1] + row[j];
     }
-    return row;
+
+    next.push(1);
+    row = next;
+  }
+
+  return row;
 }
