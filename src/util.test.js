@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { binomial } from './util.js';
 
 class MockVector {
   constructor(x = 0, y = 0) {
@@ -58,6 +57,19 @@ function oneCount(x) {
     x >>= 1;
   }
   return count;
+}
+
+function binomial(n) {
+  let row = [1];
+  for (let i = 0; i < n; i++) {
+    let next = [1];
+    for (let j = 1; j < row.length; j++) {
+      next[j] = row[j - 1] + row[j];
+    }
+    next.push(1);
+    row = next;
+  }
+  return row;
 }
 
 describe('util.js', () => {
